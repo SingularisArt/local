@@ -1,89 +1,113 @@
 #!/usr/bin/env python3
 
-from datetime import datetime
-import ntpath
-import sys
 import re
 import os
-
-HOME = os.path.expanduser('~')
-
-sys.path.insert(0, '{}/ ~/Singularis/local/scripts/school/')
-
-from config import r, rofi, EDITOR, TERMINAL, CURRENT_COURSE
-
-units = [os.path.join(CURRENT_COURSE, o) for o in os.listdir(CURRENT_COURSE)
-         if os.path.isdir(os.path.join(CURRENT_COURSE, o))]
-options = []
-lesson_numbers = []
-lesson_dates = []
-lesson_names = []
-lesson_units = []
+import sys
+import ntpath
+from datetime import datetime
 
 
-def get_week(d=datetime.today()):
-    return (int(d.strftime('%W')) + 52 - 5) % 52
+class Lessons:
+    def __init__(self):
+        self.home = os.path.expanduser('~')
+        sys.path.insert(0, '{}/Singularis/local/scripts/school/'.format(
+                            self.home))
 
+        from config import tex_types, new_chap, discourage_folders, rofi
+        from config import EDITOR, TERMINAL, NOTES_DIR, ROOT
+        from config import CURRENT_COURSE, SOURCE_LESSONS_LOCATION
 
-if not os.path.isdir(CURRENT_COURSE):
-    r.error('''
-              You don\'t have a CURRENT_COURSE in your notes dir.
-                              Please set that up!
-              To do this, you can run `py rofi-current-course.py`
-                            or run `WINDOWS+ALT+c`.
-     Then, you choose the class that you want to set as your current class.
-                   After all of that, you can run this file.
-''')
-    exit(1)
+        self.tex_types = tex_types
+        self.new_chap = new_chap
+        self.discourage_folders = discourage_folders
 
-for unit in units:
-    unit_head, unit_tail = ntpath.split(unit)
+        self.rofi = rofi
 
-    lessons = [os.path.join(unit, o) for o in os.listdir(unit)
-               if os.path.isfile(os.path.join(unit, o))]
+        self.editor = EDITOR
+        self.terminal = TERMINAL
+        self.notes_dir = NOTES_DIR
+        self.root = ROOT
+        self.current_course = CURRENT_COURSE
+        self.source_lesson_location = SOURCE_LESSONS_LOCATION
 
-    lessons = sorted(lessons)
+        self.units = sorted(self.get_units())
+        self.options, \
+            self.lesson_numbers, \
+            self.lesson_dates, self.lesson_names, \
+            self.lesson_units = self.get_lesson_info()
 
-    for lesson in lessons:
-        lesson_head, lesson_tail = ntpath.split(lesson)
+    def get_units(self):
+        return [os.path.join(self.current_course, o)
+                for o in os.listdir(self.current_course)
+                if os.path.isdir(os.path.join(self.current_course, o))]
 
-        if unit_tail != 'figures':
-            with open(lesson, encoding="utf8", errors='ignore') as f:
-                for line in f:
-                    for count, _ in enumerate(f):
-                        pass
-                    try:
+    def get_week(self, d=datetime.today()):
+        return (int(d.strftime('%W')) + 52 - 5) % 52
+
+    def get_lesson_info(self):
+        options = []
+        lesson_numbers = []
+        lesson_dates = []
+        lesson_names = []
+        lesson_units = []
+
+        for unit in self.units:
+            unit_head, unit_tail = ntpath.split(unit)
+
+            lessons = sorted([os.path.join(unit, o) for o in os.listdir(unit)
+                              if os.path.isfile(os.path.join(unit, o))])
+
+            for lesson in lessons:
+                lesson_head, lesson_tail = ntpath.split(lesson)
+
+                if lesson_tail in self.discourage_folders:
+                    break
+                with open(lesson, encoding="utf8",
+                          errors='ignore') as lesson_file:
+                    for line in lesson_file:
+                        for count, _ in enumerate(lesson_file):
+                            pass
                         lesson_match = re.search(
                             r'\\lesson\{(.*?)\}\{(.*?)\}\{(.*?)\}\{(.*?)\}',
                             line)
 
-                        lesson_number = lesson_match.group(1)
-                        lesson_date = lesson_match.group(2)
-                        lesson_name = lesson_match.group(3)
-                        lesson_unit = lesson_match.group(4)
+                        try:
+                            lesson_number = lesson_match.group(1)
+                            lesson_date = lesson_match.group(2)
+                            lesson_name = lesson_match.group(3)
+                            lesson_unit = lesson_match.group(4)
 
-                        lesson_numbers.append(lesson_number)
-                        lesson_dates.append(lesson_date)
-                        lesson_names.append(lesson_name)
-                        lesson_units.append(lesson_unit.replace(
-                            'U', 'u',).replace(' ', '-'))
+                            lesson_numbers.append(lesson_number)
+                            lesson_dates.append(lesson_date)
+                            lesson_names.append(lesson_name)
+                            lesson_units.append(lesson_unit.replace(
+                                'U', 'u',).replace(' ', '-'))
+                            if count <= 5:
+                                lesson_unit += " File Empty"
 
-                        if count <= 5:
-                            lesson_unit += " File Empty"
+                            options.append(
+                                "<span color='red'>{number: >2}</span>. "
+                                "<b><span color='blue'>{title: <{fill}}</span>"
+                                "</b> <i><span color='yellow' size='smaller'>"
+                                "{date}</span> <span color='green' "
+                                "size='smaller'>({week})</span></i>".format(
+                                    fill=35,
+                                    number=lesson_number,
+                                    title=lesson_name,
+                                    date=lesson_date,
+                                    week=lesson_unit
+                                ))
+                        except Exception:
+                            pass
 
-                        options.append(
-                            "<span color='red'>{number: >2}</span>. <b><span color='blue'>{title: <{fill}}</span></b> <i><span color='yellow' size='smaller'>{date}</span> <span color='green' size='smaller'>({week})</span></i>".format(
-                                fill=35,
-                                number=lesson_number,
-                                title=lesson_name,
-                                date=lesson_date,
-                                week=lesson_unit
-                            ))
-                        break
-                    except Exception:
-                        pass
 
-key, index, selected = rofi('Select lesson', options, [
+        return options, lesson_numbers, lesson_dates, \
+            lesson_names, lesson_units
+
+
+lesson = Lessons()
+
+key, index, selected = lesson.rofi('Select lesson', lesson.options, [
     '-scroll-method', 1,
     '-lines', 5,
     '-markup-rows',
@@ -92,7 +116,8 @@ key, index, selected = rofi('Select lesson', options, [
     '-keep-left'
 ])
 
-os.system('nvim-ctrl "-e {}"'.format('{}/{}/lesson-{}.tex'.format(
-    CURRENT_COURSE,
-    lesson_units[index],
-    lesson_numbers[index])))
+os.system('xfce4-terminal -e "{} {}"'.format(lesson.editor,
+          '{}/{}/lesson-{}.tex'.format(
+            lesson.current_course,
+            lesson.lesson_units[index],
+            lesson.lesson_numbers[index])))

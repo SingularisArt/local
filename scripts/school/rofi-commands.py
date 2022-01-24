@@ -8,7 +8,6 @@ Date: Jan 23 2022 Sun (00:45:44)
 import os
 import sys
 import ntpath
-from pprint import pprint
 
 
 class SourceLessons:
