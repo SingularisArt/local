@@ -1,0 +1,9 @@
+#!/bin/sh
+
+case $BLOCK_BUTTON in
+	1) $HOME/Singularis/local/scripts/xmenu-script ;;
+	3) notify-send "XMenu" "Right click to launch XMenu" ;;
+	5) "$TERMINAL" -e "$EDITOR $0" ;;
+esac
+
+echo ""

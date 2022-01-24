@@ -1,0 +1,14 @@
+#! /usr/bin/env bash
+
+source ~/.config/zsh/exports.zsh
+
+function tmux_sessions() { tmux list-session -F '#S' }
+
+tmux_session=$( (echo new; tmux_sessions) | rofi -dmenu -p "Select tmux session")
+
+if [[ ${tmux_session} -eq "new" ]]; then
+  ${TERMINAL} -e $(tmux new-session)
+else
+  ${TERMINAL} -e $(tmux attach -t "${tmux_session}")
+fi
+

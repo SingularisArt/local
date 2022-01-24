@@ -1,0 +1,22 @@
+#!/bin/sh
+
+source ~/.config/zsh/exports.zsh
+
+# Displays number of unread mail and an loading icon if updating.
+# When clicked, brings up `neomutt`.
+
+case $BLOCK_BUTTON in
+	1) setsid -f "$TERMINAL" -e neomutt ;;
+	2) setsid -f mw -Y >/dev/null ;;
+	3) notify-send "📬 Mail module" "\- Shows unread mail
+- Shows 🔃 if syncing mail
+- Left click opens neomutt
+- Middle click syncs mail" ;;
+	6) "$TERMINAL" -e "$EDITOR $0" ;;
+esac
+
+new_mail="$(ls ~/.local/share/mail/dermdorm2@gmail.com/INBOX/new/ | wc -l)"
+current_mail="$(find ~/.local/share/mail/dermdorm2@gmail.com/ -name 'cur' -exec ls {} \; | wc -l)"
+
+echo "📬 ${new_mail}/${current_mail}"
+
