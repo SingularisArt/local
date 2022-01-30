@@ -1,14 +1,16 @@
 #! /usr/bin/env bash
 
-source ~/.config/zsh/exports.zsh
+function tmux_sessions()
+{
+    tmux list-session -F '#S'
+}
 
-function tmux_sessions() { tmux list-session -F '#S' }
+TMUX_SESSION=$( (echo new; tmux_sessions) | rofi -dmenu -p "Select tmux session")
 
-tmux_session=$( (echo new; tmux_sessions) | rofi -dmenu -p "Select tmux session")
-
-if [[ ${tmux_session} -eq "new" ]]; then
-  ${TERMINAL} -e $(tmux new-session)
+if [[ x"new" = x"${TMUX_SESSION}" ]]; then
+    rofi-sensible-terminal -e tmux new-session &
+elif [[ -z "${TMUX_SESSION}" ]]; then
+    echo "Cancel"
 else
-  ${TERMINAL} -e $(tmux attach -t "${tmux_session}")
+    rofi-sensible-terminal -e tmux attach -t "${TMUX_SESSION}" &
 fi
-
