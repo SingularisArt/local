@@ -9,7 +9,7 @@ class ChangeCourse:
     def __init__(self):
         self.home = os.path.expanduser('~')
         sys.path.insert(0, '{}/Singularis/local/scripts/school/'.format(
-                            self.home))
+            self.home))
 
         from config import tex_types, new_chap, discourage_folders, rofi
         from config import EDITOR, TERMINAL, NOTES_DIR, ROOT

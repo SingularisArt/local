@@ -7,25 +7,27 @@ r = Rofi()
 
 tex_types = ['.tex', '.latex']
 new_chap = False
-discourage_folders = ['images', 'assignments', 'figures', 'projects']
+discourage_folders = ['images', 'assignments', 'figures', 'projects',
+                      '.git', 'media', 'current-course']
 
 EDITOR = 'nvim'
+VIEWER = 'zathura'
 TERMINAL = 'xfce4-terminal'
 NOTES_DIR = Path('~/Documents/notes').expanduser()
 ROOT = '{}/Grade-10/semester-1'.format(NOTES_DIR)
 CURRENT_COURSE = '{}/current-course'.format(NOTES_DIR)
 SOURCE_LESSONS_LOCATION = '{}/source-lessons.tex'.format(CURRENT_COURSE)
 
-if not os.path.isdir(CURRENT_COURSE):
-    r.error('''
-              You don\'t have a CURRENT_COURSE in your notes dir.
-                              Please set that up!
-              To do this, you can run `py rofi-current-course.py`
-                            or run `WINDOWS+ALT+c`.
-     Then, you choose the class that you want to set as your current class.
-                   After all of that, you can run this file.
-''')
-    exit(1)
+# if not os.path.isdir(CURRENT_COURSE):
+#     r.error('''
+#               You don\'t have a CURRENT_COURSE in your notes dir.
+#                               Please set that up!
+#               To do this, you can run `py rofi-current-course.py`
+#                             or run `WINDOWS+ALT+c`.
+#      Then, you choose the class that you want to set as your current class.
+#                    After all of that, you can run this file.
+# ''')
+#     exit(1)
 
 
 def rofi(prompt, options, rofi_args=[], fuzzy=True):

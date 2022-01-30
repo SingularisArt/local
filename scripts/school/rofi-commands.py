@@ -3,6 +3,14 @@
 """
 Author: Hashem A. Damrah
 Date: Jan 23 2022 Sun (00:45:44)
+
+This class is used to create a rofi menu for the user to select a command
+to execute.
+
+The commands source a selected number of lessons from my notes directory
+which is located ~/Documents/notes/.
+
+Then, the user is given the option to open the compiled pdf.
 """
 
 import os
@@ -12,12 +20,14 @@ import ntpath
 
 class SourceLessons:
     def __init__(self):
+        """ This function initializes the class """
+
         self.home = os.path.expanduser('~')
         sys.path.insert(0, '{}/Singularis/local/scripts/school/'.format(
                             self.home))
 
         from config import tex_types, new_chap, discourage_folders, rofi
-        from config import EDITOR, TERMINAL, NOTES_DIR, ROOT
+        from config import EDITOR, VIEWER, TERMINAL, NOTES_DIR, ROOT
         from config import CURRENT_COURSE, SOURCE_LESSONS_LOCATION
 
         self.tex_types = tex_types
@@ -27,6 +37,7 @@ class SourceLessons:
         self.rofi = rofi
 
         self.editor = EDITOR
+        self.viewer = VIEWER
         self.terminal = TERMINAL
         self.notes_dir = NOTES_DIR
         self.root = ROOT
@@ -267,11 +278,30 @@ class SourceLessons:
 
 lesson = SourceLessons()
 
-key, index, selected = lesson.rofi('Select Item, or type a range (e.g. 3-5)',
+key, index, selected = lesson.rofi('Select Item, or type a range',
                                    lesson.options,
                                    ['-scroll-method', 1,
                                     '-lines', 5,
                                     '-markup-rows'])
 
+
 lesson.selected = selected
+
 lesson.check_selection()
+
+os.chdir(lesson.current_course)
+cwd = os.getcwd()
+
+os.system('pdflatex master.tex')
+os.system('pdflatex master.tex')
+
+
+key, index, selected = lesson.rofi('Finished',
+                                   ['Open PDF', 'Exit'],
+                                   ['-lines', 1, '-markup-rows'])
+
+
+if selected == 'Open PDF':
+    os.system('{} {}/master.pdf'.format(lesson.viewer, cwd))
+else:
+    sys.exit()
