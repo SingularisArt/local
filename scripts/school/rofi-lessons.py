@@ -100,7 +100,6 @@ class Lessons:
                         except Exception:
                             pass
 
-
         return options, lesson_numbers, lesson_dates, \
             lesson_names, lesson_units
 

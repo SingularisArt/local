@@ -3,13 +3,10 @@
 """
 Author: Hashem A. Damrah
 Date: Jan 23 2022 Sun (00:45:44)
-
 This class is used to create a rofi menu for the user to select a command
 to execute.
-
 The commands source a selected number of lessons from my notes directory
 which is located ~/Documents/notes/.
-
 Then, the user is given the option to open the compiled pdf.
 """
 
@@ -71,11 +68,8 @@ class SourceLessons:
     def get_all_folders(self):
         """
         This function returns all of the folders in a list.
-
         It returns them in this order
-
         folder_head, folder_tail
-
         folder_head: This is the absolute path to the folder
         folder_tail: This is just the name for the folder
         """
@@ -96,9 +90,7 @@ class SourceLessons:
     def get_all_units(self):
         """
         This function returns all of the units in a list.
-
         It returns them in this order
-
         unit_head: This is the absolute path to the unit
         unit_tail: This is just the name for the unit
         """
@@ -115,9 +107,7 @@ class SourceLessons:
     def get_all_lessons(self):
         """
         This function returns all of the lessons in a list.
-
         It returns them in this order
-
         lesson_head: list: This is the absolute path to the lesson
         lesson_tail: list: This is just the name for the lesson
         all_lessons: dict: {'unit-1': ['lesson-1.tex', 'lesson-2.tex', ...]}
@@ -155,16 +145,13 @@ class SourceLessons:
     def get_latest_lesson(self, lessons: list) -> str:
         """
         This function gets you the last two lessons.
-
         It returns them in this order
-
         latest_lesson_head: This is the absolute path to the last lesson
         latest_lesson_tail: This is the name of the last lesson
         second_to_last_lesson_head: This is the absolute path to the second to
             last lesson
         second_to_last_lesson_tail: This is the name of the
             second to last lesson
-
         :param lessons list: This is a list with all of the lessons
         """
         if ntpath.split(lessons[-1])[1] == self.unit_info_name:

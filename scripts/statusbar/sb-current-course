@@ -1,12 +1,10 @@
 #!/bin/sh
 
 CURRENT_COURSE=~/Documents/notes/current-course
-og_course=$(readlink ${CURRENT_COURSE})
 name=$(cat ${CURRENT_COURSE}/info.yaml | shyaml get-value title)
 
 case $BLOCK_BUTTON in
 	1) $HOME/Singularis/local/scripts/school/rofi-current-course.py ;;
-	# 2) notify-send "Grade for ${name}" "${grade}%" ;;
 	3) $HOME/Singularis/local/scripts/school/rofi-lessons.py ;;
 	6) "$TERMINAL" -e "$EDITOR $0" ;;
 esac
