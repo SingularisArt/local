@@ -13,6 +13,7 @@ Then, the user is given the option to open the compiled pdf.
 import os
 import sys
 import ntpath
+from rofi import Rofi
 
 
 class SourceLessons:
@@ -32,6 +33,7 @@ class SourceLessons:
         self.discourage_folders = discourage_folders
 
         self.rofi = rofi
+        self.r = Rofi()
 
         self.editor = EDITOR
         self.viewer = VIEWER
@@ -126,19 +128,23 @@ class SourceLessons:
                 lessons_head.append('{}/{}'.format(lesson_head, lesson_tail))
                 lessons_tail.append(lesson_tail)
 
-        size = len(lessons_tail)
-        lessons_tail_splited = [idx + 1 for idx, val in
-                                enumerate(lessons_tail)
-                                if val == self.unit_info_name]
+        try:
+            size = len(lessons_tail)
+            lessons_tail_splited = [idx + 1 for idx, val in
+                                    enumerate(lessons_tail)
+                                    if val == self.unit_info_name]
 
-        lessons_tail_new = [lessons_tail[i: j] for i, j in
-                            zip([0] + lessons_tail_splited,
-                                lessons_tail_splited +
-                                ([size] if lessons_tail_splited[-1] != size
-                                    else []))]
+            lessons_tail_new = [lessons_tail[i: j] for i, j in
+                                zip([0] + lessons_tail_splited,
+                                    lessons_tail_splited +
+                                    ([size] if lessons_tail_splited[-1] != size
+                                        else []))]
 
-        for x, lesson in enumerate(lessons_tail_new):
-            all_lessons[self.units_tail[x]] = lesson
+            for x, lesson in enumerate(lessons_tail_new):
+                all_lessons[self.units_tail[x]] = lesson
+        except Exception:
+            self.r.error('No lessons found')
+            sys.exit(1)
 
         return lessons_head, lessons_tail, all_lessons
 
@@ -281,6 +287,7 @@ cwd = os.getcwd()
 
 os.system('pdflatex master.tex')
 os.system('pdflatex master.tex')
+os.system('rubber --clean master')
 
 
 key, index, selected = lesson.rofi('Finished',

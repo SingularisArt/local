@@ -1,71 +1,145 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
-import re
+"""
+Author: Hashem A. Damrah
+Date: Jan 23 2022 Sun (00:45:44)
+This class is used to create a rofi menu for the user to select a command
+to execute.
+"""
+
 import os
+import re
 import sys
-from datetime import date, datetime
+from rofi import Rofi
+from datetime import date
+from datetime import datetime
 
-HOME = os.path.expanduser('~')
 
-sys.path.insert(0, '{}/ ~/Singularis/local/scripts/school/')
+class NewLesson:
+    def __init__(self):
+        """ This function initializes the class """
 
-from config import CURRENT_COURSE, tex_types, r
+        self.home = os.path.expanduser('~')
+        sys.path.insert(0, '{}/Singularis/local/scripts/school/'.format(
+                            self.home))
 
-file_name = r.text_entry('File name EX: (unit-1/lesson-19.tex)')
+        from config import tex_types, new_chap, discourage_folders
+        from config import EDITOR, VIEWER, TERMINAL, NOTES_DIR, ROOT
+        from config import CURRENT_COURSE, SOURCE_LESSONS_LOCATION
 
-# Check if the file isn't a LaTeX file
-if file_name[-4:] not in tex_types:
-    tex_types = ', '.join(tex_types)
-    r.error('Sorry! The file must a LaTeX file ({})'.format(tex_types))
+        self.tex_types = tex_types
+        self.new_chap = new_chap
+        self.discourage_folders = discourage_folders
 
-# Perform the regex to get the unit number and lesson number
-lesson_match = re.search(r'unit-(\d+)/(lesson-\d+)\.tex', file_name)
+        self.unit_info_name = 'unit-info.tex'
 
-# If the lesson is the first lesson, then we ask for the module name
-try:
-    if lesson_match.group(2) == 'lesson-1':
-        module_name = r.text_entry('Enter module name')
-        new_chap = True
-except Exception:
-    new_chap = False
+        self.rofi = Rofi()
 
-# Get some extra data
-file_number = r.integer_entry('Lesson number')
-lesson_name = r.text_entry('Lesson name')
-lesson_unit = r.text_entry('Lesson unit EX: (Unit 3)')
+        self.editor = EDITOR
+        self.viewer = VIEWER
+        self.terminal = TERMINAL
+        self.notes_dir = NOTES_DIR
+        self.root = ROOT
+        self.current_course = CURRENT_COURSE
+        self.source_lesson_location = SOURCE_LESSONS_LOCATION
+        self.date, self.time = self.get_current_date()
+        self.file_path, self.lesson_name, self.module_name, \
+            self.unit_number, self.lesson_number = self.get_info()
 
-# Check if the lesson already exists
-if os.path.exists(CURRENT_COURSE + '/' + file_name):
-    r.error('Sorry! A file already exists with that name! Try again.')
-    exit(1)
+        self.write_info()
 
-# Get some extra data
-today = date.today()
-now = datetime.now()
-today_date = today.strftime('%b %d %Y %a')
-current_time = now.strftime(' (%H:%M:%S)')
+    def get_current_date(self):
+        """ This function gets the current date """
 
-# Transform from the inputted unit to the folder unit name
-# Example: Unit 10 - unit-10
-lesson_unit_folder_name = lesson_unit.replace(' ', '-')
-lesson_unit_folder_name = lesson_unit_folder_name.lower()
+        today = date.today()
+        now = datetime.now()
 
-# Check if the folder exists. If it doesn't, we simply create it
-if not os.path.isdir('{}/{}'.format(CURRENT_COURSE, lesson_unit_folder_name)):
-    os.makedirs('{}/{}'.format(CURRENT_COURSE, lesson_unit_folder_name))
+        current_date = today.strftime('%b %d %Y %a')
+        current_time = now.strftime('(%H:%M:%S)')
 
-# Write all of the information to the file that the user wants to create
-with open(CURRENT_COURSE + '/' + file_name, 'w') as new_file:
-    new_file.write('\\lesson{' + str(file_number) + '}{' + today_date + current_time + '}{' + lesson_name + '}' + '{' + lesson_unit + '}')
-    new_file.write('\n\n\n\n\\newpage')
+        return current_date, current_time
 
-# Add the file to the `source-lesson.tex` file to input it into the master.tex
-with open(CURRENT_COURSE + '/source-lessons.tex', 'a') as source_file:
-    # If we are creating the first lesson of the unit, the we will
-    # Add the Unit name and the Unit number in the unit-info.tex file
-    # And then we will source it in the source-lessons.tex
-    if new_chap:
-        with open(CURRENT_COURSE + '/unit-info.tex', 'w') as unit_info_file:
-            unit_info_file.write('\\chapter{}')
-        source_file.write('\\input{' + lesson_unit + '/unit-info}\n')
-    source_file.write('\\input{' + file_name[:-4] + '}\n')
+    def get_info(self):
+        """ This function gets the information from the user """
+
+        module_name = ''
+
+        file_path = self.rofi.text_entry('File name EX: (unit-1/lesson-19)')
+
+        # Perform the regex to get the unit number and lesson number
+        lesson_match = re.search(r'unit-(\d+)/(lesson-\d+)\.tex', file_path)
+
+        # Check if the file isn't a LaTeX file
+        if file_path[-4:] not in self.tex_types:
+            tex_types = ', '.join(self.tex_types)
+            self.rofi.error(
+                'Sorry! The file must a LaTeX file ({})'.format(tex_types))
+            self.get_info()
+
+        if os.path.exists('{}/{}'.format(self.current_course, file_path)):
+            self.rofi.error(
+                'Sorry! The file already exists in the current course')
+            yn = self.rofi.text_entry('Would you like to overwrite it? [y/n]')
+
+            if yn != 'y':
+                self.get_info()
+
+        lesson_name = self.rofi.text_entry('Lesson name')
+
+        # If the lesson is the first lesson, then we ask for the module name
+        try:
+            if lesson_match.group(2) == 'lesson-1':
+                module_name = self.rofi.text_entry('Enter module name')
+        except Exception:
+            pass
+
+        try:
+            os.makedirs('{}/unit-{}'.format(self.current_course,
+                                            lesson_match.group(1)))
+        except Exception:
+            pass
+
+        return file_path, lesson_name, module_name, lesson_match.group(1), \
+            lesson_match.group(2)
+
+    def write_info(self):
+        """ This function writes the information to the file """
+
+        lesson_info = '\\lesson{' + self.lesson_number[7:] + '}' + \
+            '{' + self.date + ' ' + self.time + '}' + \
+            '{' + self.lesson_name + '}' + \
+            '{Unit ' + self.unit_number + '}\n\n\n\n' + \
+            '\\newpage'
+
+        # Write the information to the file that the user wants to create
+        with open('{}/{}'.format(self.current_course, self.file_path),
+                  'w') as new_file:
+            new_file.write(lesson_info)
+
+        if self.module_name:
+            self.write_module_info()
+
+    def write_module_info(self):
+        """ This function writes the module information to the file """
+
+        module_info = '\\chapter{' + self.module_name + '}'
+        section_info = '\\section{Unit ' + self.unit_number + '}'
+
+        with open('{}/unit-{}/{}'.format(self.current_course, self.unit_number,
+                                         self.unit_info_name),
+                  'w') as new_file:
+            new_file.write(module_info)
+            new_file.write('\n\n')
+            new_file.write(section_info)
+
+
+new = NewLesson()
+
+os.system('~/Singularis/local/scripts/school/rofi-commands.py')
+
+yn = new.rofi.text_entry('Would you like to open the new lesson? [y/n]')
+
+if yn == 'y':
+    os.system('{} -e "{} {}"'.format(new.terminal, new.editor,
+                                     '{}/{}'.format(new.current_course,
+                                                    new.file_path)))

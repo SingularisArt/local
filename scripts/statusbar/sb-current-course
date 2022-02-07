@@ -1,5 +1,6 @@
 #!/bin/sh
 
+source ~/.config/zsh/exports.zsh
 CURRENT_COURSE=~/Documents/notes/current-course
 name=$(cat ${CURRENT_COURSE}/info.yaml | shyaml get-value title)
 
