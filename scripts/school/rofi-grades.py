@@ -1,68 +1,132 @@
 #!/usr/bin/env python3
 
+"""
+Author: Hashem A. Damrah
+Date: 2022-02-09 03:15
+"""
+
 from bs4 import BeautifulSoup
 from rofi import Rofi
+import pandas as pd
 import requests
+import operator
 import yaml
 import sys
 import os
+import re
 
-HOME = os.path.expanduser('~')
 
-sys.path.insert(0, '{}/ ~/Singularis/local/scripts/school/')
+class Grades:
+    def __init__(self):
+        """This function initializes the class"""
 
-from config import rofi, EDITOR, TERMINAL, NOTES_DIR, ROOT, CURRENT_COURSE
+        self.home = os.path.expanduser("~")
+        sys.path.insert(0, "{}/Singularis/local/scripts/school/".format(self.home))
 
-r = Rofi()
+        from config import tex_types, new_chap, discourage_folders, rofi
+        from config import EDITOR, VIEWER, TERMINAL, NOTES_DIR, ROOT
+        from config import CURRENT_COURSE, SOURCE_LESSONS_LOCATION
 
-classes = [os.path.join(ROOT, o) for o in os.listdir(ROOT)
-           if os.path.isdir(os.path.join(ROOT, o))]
+        self.tex_types = tex_types
+        self.new_chap = new_chap
+        self.discourage_folders = discourage_folders
 
-names = []
-urls = []
-grades = []
-grade_string = ''
+        self.rofi = rofi
+        self.r = Rofi()
 
-for classs in classes:
-    info = open('{}/info.yaml'.format(classs))
-    file_info = yaml.load(info, Loader=yaml.FullLoader)
+        self.editor = EDITOR
+        self.viewer = VIEWER
+        self.terminal = TERMINAL
+        self.notes_dir = NOTES_DIR
+        self.root = ROOT
+        self.current_course = CURRENT_COURSE
+        self.source_lesson_location = SOURCE_LESSONS_LOCATION
 
-    names.append(file_info['title'])
-    urls.append(file_info['url'] + '/grades')
+        self.headers = {
+            "authority": "bakercharters.instructure.com",
+            "cache-control": "max-age=0",
+            "sec-ch-ua": '" Not A;Brand";v="99", "Chromium";v="98", "Google Chrome";v="98"',
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": '"Linux"',
+            "upgrade-insecure-requests": "1",
+            "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.80 Safari/537.36",
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+            "sec-fetch-site": "none",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-user": "?1",
+            "sec-fetch-dest": "document",
+            "accept-language": "en-US,en;q=0.9",
+            "cookie": "_ga=GA1.2.776452699.1644355646; _gid=GA1.2.383447782.1644355646; _gat=1; log_session_id=57974abe9683873403e2457fb10a1fb4; _legacy_normandy_session=Hct16IcwPy_1YnailbhACg+Rz_Do0cIzMRZFgOCR3BIRpMSUyaWOFZ2aDwqfUvPdLZCPq_0_UvcqSVu4aEXEQaS0fYbXA9tek0UPnXd6tXKW0Crpgtsy1Zo-ofHYIJMCBLHSSAuPyN7PiqB2dXWJLsmXU365e7tslr5wZmhFxIlChnvk6mXnOExGutwF1qVa6ep0ZP-kqCMRmgdpcgCs7fveNeuimLqomfv-W4BDBmoL3yhKm657smI2IpFBGUDLbieneclLDw8ekeNnV8r7m36BdFnboJWP-tGv90u4BaB0cvg54iVjMLcKK1w6KEUHyp3KnERwxTH2bVk_w4-f3tfpEW4j_Ae5zJKwNm_pwGCabrBMuo_leK4EI3HrrFuYvaheMMH-e3NNzqxz_gmlW3dNNBXyxlarmqmmq0hlt2nc-NCI8qRLTBRSk4RN-GympE.y3XdOsrlkT6p8FVMr3fNFq1Mjus.YgORSw; canvas_session=Hct16IcwPy_1YnailbhACg+Rz_Do0cIzMRZFgOCR3BIRpMSUyaWOFZ2aDwqfUvPdLZCPq_0_UvcqSVu4aEXEQaS0fYbXA9tek0UPnXd6tXKW0Crpgtsy1Zo-ofHYIJMCBLHSSAuPyN7PiqB2dXWJLsmXU365e7tslr5wZmhFxIlChnvk6mXnOExGutwF1qVa6ep0ZP-kqCMRmgdpcgCs7fveNeuimLqomfv-W4BDBmoL3yhKm657smI2IpFBGUDLbieneclLDw8ekeNnV8r7m36BdFnboJWP-tGv90u4BaB0cvg54iVjMLcKK1w6KEUHyp3KnERwxTH2bVk_w4-f3tfpEW4j_Ae5zJKwNm_pwGCabrBMuo_leK4EI3HrrFuYvaheMMH-e3NNzqxz_gmlW3dNNBXyxlarmqmmq0hlt2nc-NCI8qRLTBRSk4RN-GympE.y3XdOsrlkT6p8FVMr3fNFq1Mjus.YgORSw; _csrf_token=sh%2BvAcnZMpHJB6Bapgpn7yf8iC2phUJDqKzNTKqTFr7hV%2F5Ore5m3KhAzx6QbF%2BoEa7CatO1dQrFx5sEy9Fi0w%3D%3D",
+        }
 
-headers = {
-    'authority': 'bakercharters.instructure.com',
-    'cache-control': 'max-age=0',
-    'sec-ch-ua': '"Chromium";v="94", "Google Chrome";v="94", ";Not A Brand";v="9"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Windows"',
-    'upgrade-insecure-requests': '1',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36',
-    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-    'sec-fetch-site': 'same-origin',
-    'sec-fetch-mode': 'navigate',
-    'sec-fetch-user': '?1',
-    'sec-fetch-dest': 'document',
-    'referer': 'https://bakercharters.instructure.com/courses/16507',
-    'accept-language': 'en-US,en;q=0.9',
-    'cookie': '_ga=GA1.2.1062468772.1633320575; _gid=GA1.2.2078892401.1633320575; log_session_id=2101b217dcc42858b8ec1fc6533bc169; _legacy_normandy_session=NCXDzDcoUk0hrIdo5PJSZg+Ff8uQ9MngS96e-cfl0JAwl1pUU5hJDTozmv5FZMQ9BRwMDlQr26O0QvEK3SI4Q9cllFUGVDH28Dk6fmC8OpPNNiLnOqFYKn1JIpBRbHQqRVcPBQz9xh35KF5BzAqjLMqfG4sNakugUxm7nJ-gnYG84AMXnSeobAS-WKPSt-tMP1AueXMW-XYOO8N0fDO7Z8OHsT731rsc42iV_iP-JiR8WlCLqhZfEDy9a_fmwNbXORtPcYk09B25IJhptdXTsH5FkWK-eXHEAI83hZO0y1r8aO8WcSMK9yeRCnIydskXSA37cgmaoDDjmdhBjSXCLCrk9mFGm_QyjWa46S8roJL5VZiA0G8IFxnR4ratmSj1wJOfED1QblC4IbFxiDtYMvDsXhH3vBAcDHS-QqRQnsKlhRt9m1q1BgeKgCdZefKeVQ.QwlXzzybnZLXW3DNGzxtaYHy2Ms.YVqFWg; canvas_session=NCXDzDcoUk0hrIdo5PJSZg+Ff8uQ9MngS96e-cfl0JAwl1pUU5hJDTozmv5FZMQ9BRwMDlQr26O0QvEK3SI4Q9cllFUGVDH28Dk6fmC8OpPNNiLnOqFYKn1JIpBRbHQqRVcPBQz9xh35KF5BzAqjLMqfG4sNakugUxm7nJ-gnYG84AMXnSeobAS-WKPSt-tMP1AueXMW-XYOO8N0fDO7Z8OHsT731rsc42iV_iP-JiR8WlCLqhZfEDy9a_fmwNbXORtPcYk09B25IJhptdXTsH5FkWK-eXHEAI83hZO0y1r8aO8WcSMK9yeRCnIydskXSA37cgmaoDDjmdhBjSXCLCrk9mFGm_QyjWa46S8roJL5VZiA0G8IFxnR4ratmSj1wJOfED1QblC4IbFxiDtYMvDsXhH3vBAcDHS-QqRQnsKlhRt9m1q1BgeKgCdZefKeVQ.QwlXzzybnZLXW3DNGzxtaYHy2Ms.YVqFWg; _gat=1; _csrf_token=QtCI%2BA%2BCFgAmr6uXfy20bl%2BPr6xvJuTYC1fM0GlEWxYN4NmhXtdsYR%2FO3OFOaIM7OL7pnlligLdNNpmhEBw6Jw%3D%3D',
-}
+        self.src, self.soup = self.get_src()
+        (
+            self.classes,
+            self.grades,
+            self.classes_and_grades,
+        ) = self.get_classes_and_grades()
 
-result = requests.get(urls[3], headers=headers)
+    def get_src(self):
+        result = requests.get(
+            "https://bakercharters.instructure.com/grades", headers=self.headers
+        )
+        src = result.content
+        soup = BeautifulSoup(src, "lxml")
 
-src = result.content
-soup = BeautifulSoup(src, 'lxml')
+        return src, soup
 
-divs = soup.find_all('div', {'class': 'student_assignment final_grade'})
+    def get_classes_and_grades(self):
+        links = self.soup.find_all("a")
+        classes = []
 
-for div in divs:
-    print(div.text)
+        for link in links:
+            try:
+                link_id = re.search(
+                    r"/courses/([0-9]+)/grades/([0-9]+)", link.attrs["href"]
+                )
+                link_id = link_id.group(1)
+                classes.append(link.text)
+            except Exception:
+                pass
 
-print(urls[3])
-grades.append(file_info['grade'] + '%')
+        grades = self.soup.find_all("td", {"class": "percent"})
+        cleaned_grades = []
 
-for i, grade in enumerate(grades):
-    grade_string += '''{}: {}
-'''.format(names[i], grade)
+        for grade in grades:
+            grade = (
+                grade.text.replace("        ", "").replace("\n", "").replace(
+                    "    ", "")
+            )
+            cleaned_grades.append(grade)
 
-r.error(grade_string)
+        grades = cleaned_grades
+
+        classes_and_grades = {}
+
+        for key in classes:
+            for grade in grades:
+                classes_and_grades[key] = grade
+                grades.remove(grade)
+                break
+
+        classes_and_grades = sorted(
+            classes_and_grades.items(), key=operator.itemgetter(0)
+        )
+
+        return classes, grades, classes_and_grades
+
+    def output_info(self):
+        information = ''
+        for class_and_grade in self.classes_and_grades:
+            for x, class_or_grade in enumerate(class_and_grade):
+                try:
+                    information += "{} - {}\n".format(class_or_grade,
+                                                      class_and_grade[x + 1])
+                except Exception:
+                    pass
+
+        self.r.error(information)
+
+
+grades = Grades()
+grades.output_info()
