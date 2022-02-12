@@ -15,8 +15,8 @@ case $BLOCK_BUTTON in
 	6) "$TERMINAL" -e "$EDITOR $0" ;;
 esac
 
-new_mail="$(ls ~/.local/share/mail/dermdorm2@gmail.com/INBOX/new/ | wc -l)"
-current_mail="$(find ~/.local/share/mail/dermdorm2@gmail.com/ -name 'cur' -exec ls {} \; | wc -l)"
+new_mail="$(ls ~/.local/share/mail/main/INBOX/new/ | wc -l)"
+current_mail="$(find ~/.local/share/mail/main/ -name 'cur' -exec ls {} \; | wc -l)"
 
 echo "📬 ${new_mail}/${current_mail}"
 

@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 
 """
-Author: Hashem A. Damrah
-Date: 2022-02-09 03:15
+rofi-grades.py - A python script that parses my school website and displays
+                 the grades for the current semester.
 """
 
 from bs4 import BeautifulSoup
 from rofi import Rofi
-import pandas as pd
 import requests
 import operator
-import yaml
 import sys
 import os
 import re
@@ -18,14 +16,18 @@ import re
 
 class Grades:
     def __init__(self):
-        """This function initializes the class"""
+        """ This is the constructor of the Grades class """
 
         self.home = os.path.expanduser("~")
-        sys.path.insert(0, "{}/Singularis/local/scripts/school/".format(self.home))
+        sys.path.insert(0, "{}/Singularis/local/scripts/school/".format(
+            self.home))
 
-        from config import tex_types, new_chap, discourage_folders, rofi
-        from config import EDITOR, VIEWER, TERMINAL, NOTES_DIR, ROOT
+        from cookie import headers
         from config import CURRENT_COURSE, SOURCE_LESSONS_LOCATION
+        from config import EDITOR, VIEWER, TERMINAL, NOTES_DIR, ROOT
+        from config import tex_types, new_chap, discourage_folders, rofi
+
+        self.headers = headers
 
         self.tex_types = tex_types
         self.new_chap = new_chap
@@ -42,24 +44,8 @@ class Grades:
         self.current_course = CURRENT_COURSE
         self.source_lesson_location = SOURCE_LESSONS_LOCATION
 
-        self.headers = {
-            "authority": "bakercharters.instructure.com",
-            "cache-control": "max-age=0",
-            "sec-ch-ua": '" Not A;Brand";v="99", "Chromium";v="98", "Google Chrome";v="98"',
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": '"Linux"',
-            "upgrade-insecure-requests": "1",
-            "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.80 Safari/537.36",
-            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-            "sec-fetch-site": "none",
-            "sec-fetch-mode": "navigate",
-            "sec-fetch-user": "?1",
-            "sec-fetch-dest": "document",
-            "accept-language": "en-US,en;q=0.9",
-            "cookie": "_ga=GA1.2.776452699.1644355646; _gid=GA1.2.383447782.1644355646; _gat=1; log_session_id=57974abe9683873403e2457fb10a1fb4; _legacy_normandy_session=Hct16IcwPy_1YnailbhACg+Rz_Do0cIzMRZFgOCR3BIRpMSUyaWOFZ2aDwqfUvPdLZCPq_0_UvcqSVu4aEXEQaS0fYbXA9tek0UPnXd6tXKW0Crpgtsy1Zo-ofHYIJMCBLHSSAuPyN7PiqB2dXWJLsmXU365e7tslr5wZmhFxIlChnvk6mXnOExGutwF1qVa6ep0ZP-kqCMRmgdpcgCs7fveNeuimLqomfv-W4BDBmoL3yhKm657smI2IpFBGUDLbieneclLDw8ekeNnV8r7m36BdFnboJWP-tGv90u4BaB0cvg54iVjMLcKK1w6KEUHyp3KnERwxTH2bVk_w4-f3tfpEW4j_Ae5zJKwNm_pwGCabrBMuo_leK4EI3HrrFuYvaheMMH-e3NNzqxz_gmlW3dNNBXyxlarmqmmq0hlt2nc-NCI8qRLTBRSk4RN-GympE.y3XdOsrlkT6p8FVMr3fNFq1Mjus.YgORSw; canvas_session=Hct16IcwPy_1YnailbhACg+Rz_Do0cIzMRZFgOCR3BIRpMSUyaWOFZ2aDwqfUvPdLZCPq_0_UvcqSVu4aEXEQaS0fYbXA9tek0UPnXd6tXKW0Crpgtsy1Zo-ofHYIJMCBLHSSAuPyN7PiqB2dXWJLsmXU365e7tslr5wZmhFxIlChnvk6mXnOExGutwF1qVa6ep0ZP-kqCMRmgdpcgCs7fveNeuimLqomfv-W4BDBmoL3yhKm657smI2IpFBGUDLbieneclLDw8ekeNnV8r7m36BdFnboJWP-tGv90u4BaB0cvg54iVjMLcKK1w6KEUHyp3KnERwxTH2bVk_w4-f3tfpEW4j_Ae5zJKwNm_pwGCabrBMuo_leK4EI3HrrFuYvaheMMH-e3NNzqxz_gmlW3dNNBXyxlarmqmmq0hlt2nc-NCI8qRLTBRSk4RN-GympE.y3XdOsrlkT6p8FVMr3fNFq1Mjus.YgORSw; _csrf_token=sh%2BvAcnZMpHJB6Bapgpn7yf8iC2phUJDqKzNTKqTFr7hV%2F5Ore5m3KhAzx6QbF%2BoEa7CatO1dQrFx5sEy9Fi0w%3D%3D",
-        }
-
         self.src, self.soup = self.get_src()
+
         (
             self.classes,
             self.grades,
@@ -67,15 +53,31 @@ class Grades:
         ) = self.get_classes_and_grades()
 
     def get_src(self):
-        result = requests.get(
-            "https://bakercharters.instructure.com/grades", headers=self.headers
-        )
+        """
+        This function gets the source code of the grades page
+
+        Returns:
+            src (str):              The source code of the grades page
+            soup (BeautifulSoup):   The soup object of the source code
+        """
+
+        result = requests.get('https://bakercharters.instructure.com/grades',
+                              headers=self.headers)
+
         src = result.content
         soup = BeautifulSoup(src, "lxml")
 
         return src, soup
 
     def get_classes_and_grades(self):
+        """ This function gets the classes and grades from the source code
+
+        Returns:
+            classes (list):             The list of classes
+            grades (list):              The list of grades
+            classes_and_grades (dict):  The list of classes and grades
+        """
+
         links = self.soup.find_all("a")
         classes = []
 
@@ -116,6 +118,8 @@ class Grades:
         return classes, grades, classes_and_grades
 
     def output_info(self):
+        """ This function outputs the information of the grades """
+
         information = ''
         for class_and_grade in self.classes_and_grades:
             for x, class_or_grade in enumerate(class_and_grade):

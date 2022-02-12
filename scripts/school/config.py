@@ -1,4 +1,3 @@
-import os
 import subprocess
 from rofi import Rofi
 from pathlib import Path
@@ -14,7 +13,7 @@ EDITOR = 'nvim'
 VIEWER = 'zathura'
 TERMINAL = 'xfce4-terminal'
 NOTES_DIR = Path('~/Documents/notes').expanduser()
-ROOT = '{}/Grade-10/semester-2'.format(NOTES_DIR)
+ROOT = '{}/Grade-10/semester-1'.format(NOTES_DIR)
 CURRENT_COURSE = '{}/current-course'.format(NOTES_DIR)
 SOURCE_LESSONS_LOCATION = '{}/source-lessons.tex'.format(CURRENT_COURSE)
 

@@ -7,7 +7,7 @@ source ~/.config/zsh/exports.zsh
 # Show 🔒 if a vpn connection is active
 
 case $BLOCK_BUTTON in
-  1) "${TERMINAL} -e $($HOME/Singularis/local/scripts/network-manager)" ;;
+  1) ${TERMINAL} -e "nmtui" ;;
 	3) notify-send "🌐 Internet module" "\- Click to connect
 📡: no wifi connection
 📶: wifi connection with quality
