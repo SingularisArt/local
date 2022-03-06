@@ -5,7 +5,7 @@ toggle() {
     pkill -9 picom
     notify-send -u low 'picom' "Blur Disabled"
   else
-    picom -b --config=/home/hashem/.config/picom.conf &
+    picom -b --config ~/.config/picom/picom.conf --experimental-backends --backend glx --blur-method dual_kawase &
     notify-send -u low 'picom' "Blur Enabled"
   fi
 }

@@ -47,6 +47,7 @@ class SourceLessons:
             "<i><b><span color='yellow'>Current lesson</span></b></i>",
             "<i><b><span color='yellow'>Last two lessons</span></b></i>",
             "<i><b><span color='yellow'>All lessons in Unit</span></b></i>",
+            "<i><b><span color='yellow'>All Lessons From A Specific Unit</span></b></i>",
             "<i><b><span color='yellow'>All lessons</span></b></i>",
         ]
 
@@ -232,6 +233,40 @@ class SourceLessons:
             source_lessons_file.write('% Unit {} Ended'.format(
                 self.last_unit_number))
 
+    def source_specific_unit(self):
+        units_style = []
+        units = []
+        for u in self.units_tail:
+            units.append(u)
+            units_style.append(
+                    f"<i><b><span color='yellow'>Unit {u[5:]}</span></b></i>"
+            )
+
+        key, index, selected = self.rofi('Select Unit',
+                                         units_style,
+                                         ['-scroll-method', 1,
+                                          '-lines', 5,
+                                          '-markup-rows'])
+        with open(self.source_lesson_location, 'w') as source_lessons_file:
+            source_lessons_file.write('% Unit {} Started\n'.format(
+                units[index][5:]))
+            input_string = '\\input{' + units[index] + \
+                           '/' + self.unit_info_name + '}'
+            source_lessons_file.write('{}\n'.format(input_string))
+
+            unit_path = "{}/{}".format(self.current_course, units[index])
+            lessons = [f for f in os.listdir(unit_path) if os.path.isfile(
+                       os.path.join(unit_path, f))]
+
+            for lesson in sorted(lessons):
+                if lesson != self.unit_info_name:
+                    input_string = '\\input{' + units[index] + \
+                                   '/' + lesson + '}'
+                    source_lessons_file.write('{}\n'.format(input_string))
+
+            source_lessons_file.write('% Unit {} Ended\n'.format(
+                units[index][5:]))
+
     def source_all_lessons(self):
         with open(self.source_lesson_location, 'w') as source_lessons_file:
             for x, lesson in enumerate(self.all_lessons.values()):
@@ -266,6 +301,8 @@ class SourceLessons:
         elif self.selected == self.options[2]:
             self.source_all_lessons_in_unit()
         elif self.selected == self.options[3]:
+            self.source_specific_unit()
+        elif self.selected == self.options[4]:
             self.source_all_lessons()
 
 

@@ -1,7 +1,5 @@
 #!/bin/sh
 
-source ~/.config/zsh/exports.zsh
-
 # Displays number of unread mail and an loading icon if updating.
 # When clicked, brings up `neomutt`.
 
@@ -12,11 +10,12 @@ case $BLOCK_BUTTON in
 - Shows 🔃 if syncing mail
 - Left click opens neomutt
 - Middle click syncs mail" ;;
-	6) "$TERMINAL" -e "$EDITOR $0" ;;
+	6) "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-new_mail="$(ls ~/.local/share/mail/main/INBOX/new/ | wc -l)"
-current_mail="$(find ~/.local/share/mail/main/ -name 'cur' -exec ls {} \; | wc -l)"
+unread="$(find "${XDG_DATA_HOME:-$HOME/.local/share}"/mail/*/[Ii][Nn][Bb][Oo][Xx]/new/* -type f | wc -l 2>/dev/null)"
 
-echo "📬 ${new_mail}/${current_mail}"
+pidof mbsync >/dev/null 2>&1 && icon="🔃"
+
+[ "$unread" = "0" ] && [ "$icon" = "" ] || echo "📬 $unread $icon"
 
