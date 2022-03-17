@@ -33,6 +33,7 @@ class Projects:
         _get_folder_status: Gets the status of the project
         _get_options: Gets all of the projects
         _commands: Returns a list of possible commands
+        _get_flash_drives: Gets all of the flash drives
 
         open_pdf: Opens the pdf of the project
         open_source: Opens the source of the project
@@ -67,6 +68,8 @@ class Projects:
         self.current_course = CURRENT_COURSE
         self.projects_dir = str(self.notes_dir) + '/projects'
         self.source_lesson_location = SOURCE_LESSONS_LOCATION
+
+        self.user = os.getenv('USER')
 
         self.options, self.folders, self.projects_head, \
             self.projects_tail = self._get_options()
@@ -171,18 +174,28 @@ class Projects:
                 '<span color="green">Mark as Complete</span>',
                 '<span color="green">Mark as Incomplete</span>',
                 '<span color="red">Delete</span>',
-                '<span color="yellow">Exit</span>']
+                '<span color="yellow">Exit</span>',
+                '<span color="yellow">Back</span>']
 
-    def _get_flash_drives(self):
+    def _get_flash_drives(self, project_name):
         """ This function gets all of the flash drives that's connected
             to the computer/laptop/etc """
 
-        self.user = 'hashem'
-
         # List all flash drives
-        drives = [x for x in os.listdir('/run/media/{}'.format(self.user))
-                  if x.startswith('sd')]
-        print(drives)
+        # drives = [x for x in os.listdir('/run/media/{}'.format(self.user))]
+        drives = [x for x in os.listdir('/run/media/hashem/')]
+
+        if not drives:
+            self.r.error('No Flash Drives Found')
+            exit(1)
+
+        drives_with_style = []
+
+        for drive in drives:
+            new_drive = '<span color="brown">{}</span>'.format(drive)
+            drives_with_style.append(new_drive)
+
+        return drives, drives_with_style
 
     def open_pdf(self, project_name):
         """ This function opens the pdf of the project
@@ -272,11 +285,26 @@ class Projects:
         """
 
         # Get all flash drives
-        flash_drives = self._get_flash_drives()
+        drives, drives_with_style = self._get_flash_drives(project_name)
 
-        # If there are no flash drives, return an error
-        if not flash_drives:
-            self.r.error('No flash drives found!')
+        # Ask the user which drive to use via rofi
+        _, index, _ = self.rofi('Select command',
+                                drives_with_style,
+                                self.rofi_options)
+
+        project_name = project_name.replace(' ', '-').lower()
+
+        master_path = '{}/{}/master.pdf'.format(self.projects_dir,
+                                                project_name)
+        drive_path = '/run/media/{}/{}/'.format(self.user, drives[index])
+
+        try:
+            os.system('cp -r {} {}'.format(master_path, drive_path))
+        except Exception:
+            self.r.error('Couldn\'t move master.pdf to {}'.format(drive_path))
+            exit(1)
+
+        self.r.error('Copied master.pdf to {}'.format(drive_path))
 
     def mark_project(self, project_name, status):
         """ This function marks the project as complete or incomplete
@@ -348,16 +376,29 @@ class Projects:
             self.delete(project_name)
         elif command == '<span color="yellow">Exit</span>':
             sys.exit()
+        elif command == '<span color="yellow">Back</span>':
+            Main()
 
 
-projects = Projects()
+def Main():
+    projects = Projects()
 
-key, index, selected = projects.rofi('Select project', projects.options,
-                                     projects.rofi_options)
+    key, index, selected = projects.rofi('Select project', projects.options,
+                                         projects.rofi_options)
 
-key_command, index_command, \
-    selected_command = projects.rofi('Select command',
-                                     projects.commands,
-                                     projects.rofi_options)
+    key_command, index_command, \
+        selected_command = projects.rofi(
+                                         'Select command for the ' +
+                                         '{} project'.format(
+                                            projects.folders[index]),
+                                         projects.commands,
+                                         projects.rofi_options)
 
-projects.run_func_based_on_command(selected_command, projects.folders[index])
+    projects.run_func_based_on_command(selected_command,
+                                       projects.folders[index])
+
+    return projects
+
+
+if __name__ == "__main__":
+    projects = Main()

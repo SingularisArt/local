@@ -16,74 +16,62 @@ OPTIONS:
         lessons. The user can specify a range of lessons to source. The
         program will only source the lessons that exist.
 
+    Source Selected Units: This one will give the user the list of all the
+        units available. The user can select the units he wants to source. Then
+        the program sources all of the lessons in each of the unit selected.
+        IT'S COMING SOON!
+
     All Lessons: This one will just source all of the lessons.
 """
 
 import os
 import sys
 import ntpath
-from rofi import Rofi
+from config import Configuration
 
 
-class SourceLessons:
+class SourceLessons(Configuration):
+    """
+    Class for different ways to source your lessons.
+    It's inherited from the config.py/Configuration class
+
+    Methods:
+    --------
+
+    """
+
     def __init__(self):
+        Configuration.__init__(self)
+
         """ This function initializes the class """
-
-        # Import our configuration file
-        # Change this to your your path where you got these scripts from
-        self.home = os.path.expanduser('~')
-        sys.path.insert(0, '{}/Singularis/local/scripts/school/'.format(
-            self.home))
-
-        # Imports everything form the config.py file
-        from config import tex_types, new_chap, discourage_folders, rofi
-        from config import EDITOR, VIEWER, TERMINAL, NOTES_DIR, ROOT
-        from config import CURRENT_COURSE, SOURCE_LESSONS_LOCATION
-
-        self.tex_types = tex_types
-        self.new_chap = new_chap
-        self.discourage_folders = discourage_folders
-
-        self.rofi = rofi
-        self.r = Rofi()
-
-        self.editor = EDITOR
-        self.viewer = VIEWER
-        self.terminal = TERMINAL
-        self.notes_dir = NOTES_DIR
-        self.root = ROOT
-        self.current_course = CURRENT_COURSE
-        self.source_lesson_location = SOURCE_LESSONS_LOCATION
 
         # The users options
         self.options = [
             "<i><b><span color='yellow'>Current lesson</span></b></i>",
             "<i><b><span color='yellow'>Last two lessons</span></b></i>",
             "<i><b><span color='yellow'>All lessons in Unit</span></b></i>",
+            "<i><b><span color='yellow'>Select Multiple Units</span></b></i>",
             "<i><b><span color='yellow'>All lessons</span></b></i>",
         ]
 
         self.index = 0
         self.selected = self.options[self.index]
 
-        # The information file name
-        self.unit_info_name = 'unit-info.tex'
-
         # This gets all of the folders within the current course
         # The folders_head stores the absolute path to each folder
         # The folders_tail stores the folder name
-        self.folders_head, self.folders_tail = self.get_all_folders()
+        self.folders_head, self.folders_tail = self._get_all_folders()
 
         # This gets all of the units within the current course
         # The units_head stores the absolute path to each unit
         # The units_tail stores the unit folder name
-        self.units_head, self.units_tail = self.get_all_units()
+        self.units_head, self.units_tail = self._get_all_units()
 
         # This gets all of the lessons within the current course
         # The lessons_head stores the absolute path to each lesson
         # The lessons_tail stores the lesson file name
         self.lessons_head, self.lessons_tail, \
-            self.all_lessons = self.get_all_lessons()
+            self.all_lessons = self._get_all_lessons()
 
         # This gets the last two lessons, and the last unit number along with
         # its name
@@ -92,10 +80,10 @@ class SourceLessons:
             self.second_to_last_lesson_head, \
             self.second_to_last_lesson_tail, \
             self.last_unit_name, \
-            self.last_unit_number = self.get_latest_lesson(
+            self.last_unit_number = self._get_latest_lesson(
                 self.lessons_head)
 
-    def get_all_folders(self):
+    def _get_all_folders(self):
         """
         This function returns all of the folders in a list.
         It returns them in this order
@@ -128,7 +116,7 @@ class SourceLessons:
 
         return folders_head, folders_tail
 
-    def get_all_units(self):
+    def _get_all_units(self):
         """
         This function returns all of the units in a list.
         It returns them in this order
@@ -152,7 +140,7 @@ class SourceLessons:
 
         return units_head, units_tail
 
-    def get_all_lessons(self):
+    def _get_all_lessons(self):
         """
         This function returns all of the lessons in a list.
         It returns them in this order
@@ -217,7 +205,7 @@ class SourceLessons:
 
         return lessons_head, lessons_tail, all_lessons
 
-    def get_latest_lesson(self, lessons: list) -> str:
+    def _get_latest_lesson(self, lessons: list) -> str:
         """
         This function gets you the last two lessons.
         It returns them in this order
@@ -231,26 +219,48 @@ class SourceLessons:
         :param lessons list: This is a list with all of the lessons
         """
 
-        if ntpath.split(lessons[-1])[1] == self.unit_info_name:
-            latest_lesson_head = ntpath.split(lessons[-2])[0]
-            latest_lesson_tail = ntpath.split(lessons[-2])[1]
-        else:
+        if len(lessons) == 0:
+            self.r.error('No lessons found')
+            # sys.exit(1)
+        elif len(lessons) == 1:
             latest_lesson_head = ntpath.split(lessons[-1])[0]
-            latest_lesson_tail = ntpath.split(lessons[-2])[1]
+            latest_lesson_tail = ntpath.split(lessons[-1])[1]
 
-        if ntpath.split(lessons[-2])[1] == self.unit_info_name:
-            latest_lesson_head = ntpath.split(lessons[-3])[0]
-            latest_lesson_tail = ntpath.split(lessons[-3])[1]
-        else:
-            if ntpath.split(lessons[-2])[1] == latest_lesson_tail:
-                second_to_last_lesson_head = ntpath.split(lessons[-3])[0]
-                second_to_last_lesson_tail = ntpath.split(lessons[-3])[1]
+            second_to_last_lesson_head = 'NONE'
+            second_to_last_lesson_tail = 'NONE'
+
+            last_unit_name = ntpath.split(latest_lesson_head)[1]
+            last_unit_number = last_unit_name[5:]
+        elif len(lessons) == 2:
+            latest_lesson_head = ntpath.split(lessons[-1])[0]
+            latest_lesson_tail = ntpath.split(lessons[-1])[1]
+
+            second_to_last_lesson_head = ntpath.split(lessons[-2])[0]
+            second_to_last_lesson_tail = ntpath.split(lessons[-2])[1]
+
+            last_unit_name = ntpath.split(latest_lesson_head)[1]
+            last_unit_number = last_unit_name[5:]
+        elif len(lessons) >= 3:
+            if ntpath.split(lessons[-1])[1] == self.unit_info_name:
+                latest_lesson_head = ntpath.split(lessons[-2])[0]
+                latest_lesson_tail = ntpath.split(lessons[-2])[1]
             else:
-                second_to_last_lesson_head = ntpath.split(lessons[-2])[0]
-                second_to_last_lesson_tail = ntpath.split(lessons[-2])[1]
+                latest_lesson_head = ntpath.split(lessons[-1])[0]
+                latest_lesson_tail = ntpath.split(lessons[-2])[1]
 
-        last_unit_name = ntpath.split(latest_lesson_head)[1]
-        last_unit_number = last_unit_name[5:]
+            if ntpath.split(lessons[-2])[1] == self.unit_info_name:
+                latest_lesson_head = ntpath.split(lessons[-3])[0]
+                latest_lesson_tail = ntpath.split(lessons[-3])[1]
+            else:
+                if ntpath.split(lessons[-2])[1] == latest_lesson_tail:
+                    second_to_last_lesson_head = ntpath.split(lessons[-3])[0]
+                    second_to_last_lesson_tail = ntpath.split(lessons[-3])[1]
+                else:
+                    second_to_last_lesson_head = ntpath.split(lessons[-2])[0]
+                    second_to_last_lesson_tail = ntpath.split(lessons[-2])[1]
+
+            last_unit_name = ntpath.split(latest_lesson_head)[1]
+            last_unit_number = last_unit_name[5:]
 
         return latest_lesson_head, \
             latest_lesson_tail, \
@@ -259,49 +269,85 @@ class SourceLessons:
             last_unit_name, \
             last_unit_number
 
+    def _update_selection(self, selection):
+        self.selected = selection
+
     def source_current_lesson(self):
-        lesson_string = '\\input{' + self.last_unit_name + '/' + \
-            self.last_lesson_tail + '}\n'
-        with open(self.source_lesson_location, 'w') as source_lessons_file:
+        with open(self.source_lessons_location, 'w') as source_lessons_file:
+            # It writes this as an example: % Unit 1 Started
             source_lessons_file.write('% Unit {} Started\n'.format(
                 self.last_unit_number))
-            source_lessons_file.write(lesson_string)
+
+            # Source the last lesson
+            source_lessons_file.write('\\input{' + self.last_unit_name + '/' +
+                                      self.last_lesson_tail + '}\n')
+
+            # It writes this as an example: % Unit 1 Ended
             source_lessons_file.write('% Unit {} Ended'.format(
                 self.last_unit_number))
 
     def source_last_two_lessons(self):
-        lesson_string = '\\input{' + self.last_unit_name + '/' + \
-            self.second_to_last_lesson_tail + '}\n'
-        lesson_string += '\\input{' + self.last_unit_name + '/' + \
-            self.last_lesson_tail + '}\n'
-        with open(self.source_lesson_location, 'w') as source_lessons_file:
+        # We're checking if we have a second to last lesson
+        if self.second_to_last_lesson_head != 'NONE':
+            # If we do, then we're going to write the last and second last
+            # lesson to the source file
+            with open(self.source_lessons_location, 'w') as source_lessons_file:
+                # It writes this as an example: % Unit 1 Started
+                source_lessons_file.write('% Unit {} Started\n'.format(
+                    self.last_unit_number))
+
+                # Source second to last lesson
+                source_lessons_file.write('\\input{' + self.last_unit_name +
+                                          '/' + self.second_to_last_lesson_tail
+                                          + '}\n')
+                # Source last lesson
+                source_lessons_file.write('\\input{' + self.last_unit_name +
+                                          '/' + self.last_lesson_tail + '}\n')
+
+                # It writes this as an example: % Unit 1 Ended
+                source_lessons_file.write('% Unit {} Ended'.format(
+                    self.last_unit_number))
+        # If we don't, we'll just source the last lesson
+        else:
+            self.source_current_lesson()
+
+    def source_all_lessons_in_unit(self, unit):
+        with open(self.source_lessons_location, 'w') as source_lessons_file:
+            # It writes this as an example: % Unit 1 Started
             source_lessons_file.write('% Unit {} Started\n'.format(
-                self.last_unit_number))
-            source_lessons_file.write(lesson_string)
-            source_lessons_file.write('% Unit {} Ended'.format(
-                self.last_unit_number))
+                unit[5:]))
 
-    def source_all_lessons_in_unit(self):
-        with open(self.source_lesson_location, 'w') as source_lessons_file:
-            source_lessons_file.write('% Unit {} Started\n'.format(
-                self.last_unit_number))
-            lesson_string = '\\input{' + self.last_unit_name + '/' + \
-                self.unit_info_name + '}\n'
+            # It writes this as an example: \input{unit-1/unit-info.tex}
+            input_string = '\\input{' + unit + \
+                           '/' + self.unit_info_name + '}'
+            source_lessons_file.write('{}\n'.format(input_string))
 
-            source_lessons_file.write(lesson_string)
+            # The path to the selected unit
+            unit_path = "{}/{}".format(self.current_course, unit)
+            # This is complicated to explain. When I just iterated through
+            # a list of all the lessons, it would output something like this:
+            # lesson-1.tex lesson-10.tex lesson-2.tex lesson-3.tex
+            # It would make big leaps like that. So, we create a forloop using
+            # this number and we check if the lessons exists. Example:
+            # lesson-1.tex, lesson-2.tex, lesson-3.tex, lesson-4.tex
+            # If that exists, then we will write this:
+            # \input{unit-1/lesson-1.tex}
+            lesson_range_to_source = 1000
 
-            for lesson in self.lessons_head:
-                lesson_head, lesson_tail = ntpath.split(lesson)
-                unit_head, unit_tail = ntpath.split(lesson_head)
+            # Iterating through the lesson_range_to_source variable
+            for i in range(lesson_range_to_source):
+                # The path to the lesson
+                lesson_name = "{}/lesson-{}.tex".format(unit_path, i)
+                # Checking if the lesson exists
+                if os.path.exists(lesson_name):
+                    # If it does, then write it to the source_lessons file.
+                    # Example: \input{unit-1/lesson-1.tex}
+                    input_string = '\\input{' + unit + '/lesson-' + str(i) + \
+                                   '.tex}\n'
+                    source_lessons_file.write(input_string)
 
-                if unit_tail == self.last_unit_name:
-                    if lesson_tail != self.unit_info_name:
-                        lesson_string = '\\input{' + unit_tail + '/' + \
-                            lesson_tail + '}\n'
-                        source_lessons_file.write(lesson_string)
-
-            source_lessons_file.write('% Unit {} Ended'.format(
-                self.last_unit_number))
+            # It writes this as an example: % Unit 1 Ended
+            source_lessons_file.write('% Unit {} Ended\n'.format(unit[5:]))
 
     def source_range(self, lesson_range, unit_number):
         range_list = lesson_range.split('-')
@@ -317,12 +363,13 @@ class SourceLessons:
             for lesson_number in range(int(range_list[0]),
                                        int(range_list[1]) + 1):
                 # Check if lesson exists
-                if os.path.exists(self.current_course + '/' + unit_number + '/'
-                                  + 'lesson-' + str(lesson_number) + '.tex'):
+                if os.path.exists('{}/{}/lesson-{}.tex'.format(
+                            self.current_course, unit_number, lesson_number)):
                     # Write to the source-lessons.tex file
-                    source_lessons_file.write('\\input{' + unit_number +
-                                              '/lesson-' + str(lesson_number) +
-                                              '.tex}\n')
+                    string = '\\input{' + unit_number + '/lesson-' + \
+                             str(lesson_number) + '.tex}\n'
+
+                    source_lessons_file.write(string)
 
             source_lessons_file.write('% Unit {} Ended'.format(
                 unit_number[5:]))
@@ -330,6 +377,7 @@ class SourceLessons:
     def source_specific_unit(self):
         units_style = []
         units = []
+
         for u in self.units_tail:
             units.append(u)
             units_style.append(
@@ -356,44 +404,29 @@ class SourceLessons:
         if selected != selection[0]:
             self.source_range(selected, unit)
         else:
-            with open(self.source_lesson_location, 'w') as source_lessons_file:
-                source_lessons_file.write('% Unit {} Started\n'.format(
-                    units[index][5:]))
-                input_string = '\\input{' + units[index] + \
-                               '/' + self.unit_info_name + '}'
-                source_lessons_file.write('{}\n'.format(input_string))
+            self.source_all_lessons_in_unit(unit)
 
-                unit_path = "{}/{}".format(self.current_course, units[index])
-                lessons = [f for f in os.listdir(unit_path) if os.path.isfile(
-                           os.path.join(unit_path, f))]
-
-                for lesson in sorted(lessons):
-                    if lesson != self.unit_info_name:
-                        input_string = '\\input{' + units[index] + \
-                                       '/' + lesson + '}'
-                        source_lessons_file.write('{}\n'.format(input_string))
-
-                source_lessons_file.write('% Unit {} Ended\n'.format(
-                    units[index][5:]))
+    def source_selected_units(self):
+        self.r.status('Coming Soon ...')
 
     def source_all_lessons(self):
-        with open(self.source_lesson_location, 'w') as source_lessons_file:
+        with open(self.source_lessons_location, 'w') as source_lessons_file:
             for x, lesson in enumerate(self.all_lessons.values()):
                 current_unit = self.units_tail[x]
 
                 source_lessons_file.write('% Unit {} Started\n'.format(
                     current_unit[5:]))
 
-                lesson_string = '\\input{' + current_unit + '/' + \
-                    self.unit_info_name + '}\n'
+                source_lessons_file.write('\\input{' + current_unit + '/' +
+                                          self.unit_info_name + '}\n')
 
-                source_lessons_file.write(lesson_string)
-
-                for les in lesson:
-                    if les != self.unit_info_name:
-                        lesson_string = '\\input{' + self.units_tail[x] + \
-                            '/' + les + '}\n'
-                        source_lessons_file.write(lesson_string)
+                for les in range(1000):
+                    if os.path.exists('{}/{}/lesson-{}.tex'.format(
+                            self.current_course, current_unit, les)):
+                        source_lessons_file.write('\\input{' +
+                                                  self.units_tail[x] +
+                                                  '/lesson-' + str(les) +
+                                                  '.tex}\n')
 
                 if self.units_tail[x] == self.units_tail[-1]:
                     source_lessons_file.write('% Unit {} Ended'.format(
@@ -410,36 +443,19 @@ class SourceLessons:
         elif self.selected == self.options[2]:
             self.source_specific_unit()
         elif self.selected == self.options[3]:
+            self.source_selected_units()
+        elif self.selected == self.options[4]:
             self.source_all_lessons()
 
 
 lesson = SourceLessons()
 
-key, index, selected = lesson.rofi('Select Item, or type a range',
-                                   lesson.options,
-                                   ['-scroll-method', 1,
-                                    '-lines', 5,
-                                    '-markup-rows'])
+_, _, selected = lesson.rofi('Select Option',
+                             lesson.options,
+                             ['-scroll-method', 1,
+                              '-lines', 5,
+                              '-markup-rows'])
 
-
-lesson.selected = selected
+lesson._update_selection(selected)
 
 lesson.check_selection()
-
-os.chdir(lesson.current_course)
-cwd = os.getcwd()
-
-os.system('pdflatex master.tex')
-os.system('pdflatex master.tex')
-os.system('rubber --clean master')
-
-
-key, index, selected = lesson.rofi('Finished',
-                                   ['Open PDF', 'Exit'],
-                                   ['-lines', 1, '-markup-rows'])
-
-
-if selected == 'Open PDF':
-    os.system('{} {}/master.pdf'.format(lesson.viewer, cwd))
-else:
-    sys.exit()

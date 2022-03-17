@@ -5,30 +5,12 @@ import os
 import sys
 import ntpath
 from datetime import datetime
+from config import Configuration
 
 
-class Lessons:
+class Lessons(Configuration):
     def __init__(self):
-        self.home = os.path.expanduser('~')
-        sys.path.insert(0, '{}/Singularis/local/scripts/school/'.format(
-                            self.home))
-
-        from config import tex_types, new_chap, discourage_folders, rofi
-        from config import EDITOR, TERMINAL, NOTES_DIR, ROOT
-        from config import CURRENT_COURSE, SOURCE_LESSONS_LOCATION
-
-        self.tex_types = tex_types
-        self.new_chap = new_chap
-        self.discourage_folders = discourage_folders
-
-        self.rofi = rofi
-
-        self.editor = EDITOR
-        self.terminal = TERMINAL
-        self.notes_dir = NOTES_DIR
-        self.root = ROOT
-        self.current_course = CURRENT_COURSE
-        self.source_lesson_location = SOURCE_LESSONS_LOCATION
+        Configuration.__init__(self)
 
         self.units = sorted(self.get_units())
         self.options, \
