@@ -1,11 +1,14 @@
 import os
-import subprocess
-from rofi import Rofi
 from pathlib import Path
+from rofi import Rofi
 
 
 class Configuration:
     """
+    This is the basis class. It has all of the defaults that you need including
+    helper functions, variables, etc. The helper functions are used to get the
+    unit folders, classes, grades, etc.
+
     Methods:
     --------
     rofi: This is a wrapper function that helps you ask the user for input
@@ -15,24 +18,19 @@ class Configuration:
         """
         Attributes:
         -----------
-        editor: The editor to use (neovim)
-        viewer: The pdf viewer to use (zathura)
-        terminal: The terminal to use (xfce4-terminal)
-        notes_dir: The base path to the notes directory (~/Documents/notes)
+        editor: The editor to use
+        viewer: The pdf viewer to use
+        terminal: The terminal to use
+        notes_dir: The base path to the notes directory
         root: The base directory for your classes
-                                        (~/Documents/notes/Grade-10/semester-2)
-        current_course: Path to current course (~/Documents/notes/current)
+        current_course: Path to current course
         source_lessons_location: The path to the source-lessons.tex file
-                                         (~/Documents/notes/source-lessons.tex)
         r: An instance of the Rofi class
         text_types: A list of file types that are considered latex files
-                                                           (['.tex', '.latex'])
         new_chap: A boolean indicating if we need to create a new chapter
-                                                                        (False)
         discourage_folders: A list of folders that should not be considered
-                                          (['images', 'assignments', 'figures',
-                                            'projects', '.git', 'media',
-                                            'current-course'])
+        home: The home directory
+        user: The user name
         """
 
         self.editor = 'nvim'
@@ -57,51 +55,45 @@ class Configuration:
         self.home = Path.home()
         self.user = os.getenv('USER')
 
-    # These are the functions that only the
+        # This gets all of the folders within the current course
+        # The folders_head stores the absolute path to each folder
+        # The folders_tail stores the folder name
+        self.folders_head, self.folders_tail = self.get_all_folders()
 
-    def rofi(self, prompt, options, rofi_args=[], fuzzy=True):
-        """
-        Wrapper function for rofi.
+        # This gets all of the units within the current course
+        # The units_head stores the absolute path to each unit
+        # The units_tail stores the unit folder name
+        self.units_head, self.units_tail = self._get_all_units()
 
-        Parameters:
-        -----------
+        # This gets all of the lessons within the current course
+        # The lessons_head stores the absolute path to each lesson
+        # The lessons_tail stores the lesson file name
+        self.lessons_head, self.lessons_tail, \
+            self.all_lessons = self._get_all_lessons()
 
-        prompt: The prompt to display to the user
-        options: A list of options to display to the user
-        rofi_args: A list of arguments to pass to rofi ([])
-        fuzzy: A boolean indicating if we should use fuzzy matching (True)
-        """
+        # This gets the last two lessons, and the last unit number along with
+        # its name
+        self.last_lesson_head, \
+            self.last_lesson_tail, \
+            self.second_to_last_lesson_head, \
+            self.second_to_last_lesson_tail, \
+            self.last_unit_name, \
+            self.last_unit_number = self._get_latest_lesson(
+                self.lessons_head)
 
-        optionstr = '\n'.join(option.replace('\n', ' ') for option in options)
+        self.lesson_regex = r'\\lesson\{(.*?)\}\{(.*?)\}\{(.*?)\}\{(.*?)\}'
+        self.LESSON_RANGE_NUMBER = 1000
+        self.rofi_options = [
+            '-lines', 5,
+            '-markup-rows',
+            '-kb-row-down', 'Down',
+            '-kb-custom-1', 'Ctrl+n'
+        ]
 
-        args = ['rofi', '-sort', '-no-levenshtein-sort']
+        self.classes = sorted(self._get_classes())
 
-        if fuzzy:
-            args += ['-matching', 'fuzzy']
+    def _update_selection(self, selection):
+        self.selected = selection
 
-        args += ['-dmenu', '-p', prompt, '-format', 's', '-i']
-        args += rofi_args
-        args = [str(arg) for arg in args]
 
-        result = subprocess.run(args, input=optionstr,
-                                stdout=subprocess.PIPE,
-                                universal_newlines=True)
-
-        returncode = result.returncode
-        stdout = result.stdout.strip()
-
-        selected = stdout.strip()
-
-        try:
-            index = [opt.strip() for opt in options].index(selected)
-        except ValueError:
-            index = -1
-
-        if returncode == 0:
-            key = 0
-        if returncode == 1:
-            key = -1
-        if returncode > 9:
-            key = returncode - 9
-
-        return key, index, selected
+config = Configuration()

@@ -2,29 +2,19 @@
 
 import re
 import os
-import sys
 import ntpath
-from datetime import datetime
 from config import Configuration
 
 
 class Lessons(Configuration):
     def __init__(self):
-        Configuration.__init__(self)
+        super().__init__()
 
-        self.units = sorted(self.get_units())
+        self.units_head, self.units_tail = self.get_all_units()
         self.options, \
             self.lesson_numbers, \
             self.lesson_dates, self.lesson_names, \
             self.lesson_units = self.get_lesson_info()
-
-    def get_units(self):
-        return [os.path.join(self.current_course, o)
-                for o in os.listdir(self.current_course)
-                if os.path.isdir(os.path.join(self.current_course, o))]
-
-    def get_week(self, d=datetime.today()):
-        return (int(d.strftime('%W')) + 52 - 5) % 52
 
     def get_lesson_info(self):
         options = []
@@ -33,25 +23,23 @@ class Lessons(Configuration):
         lesson_names = []
         lesson_units = []
 
-        for unit in self.units:
+        for unit in self.units_head:
             unit_head, unit_tail = ntpath.split(unit)
 
-            lessons = sorted([os.path.join(unit, o) for o in os.listdir(unit)
-                              if os.path.isfile(os.path.join(unit, o))])
+            for lesson in range(self.LESSON_RANGE_NUMBER):
+                lesson = '{}/{}/lesson-{}.tex'.format(self.current_course,
+                                                      unit_tail, lesson)
 
-            for lesson in lessons:
-                lesson_head, lesson_tail = ntpath.split(lesson)
+                if not os.path.exists(lesson):
+                    continue
 
-                if lesson_tail in self.discourage_folders:
-                    break
                 with open(lesson, encoding="utf8",
                           errors='ignore') as lesson_file:
                     for line in lesson_file:
-                        for count, _ in enumerate(lesson_file):
-                            pass
-                        lesson_match = re.search(
-                            r'\\lesson\{(.*?)\}\{(.*?)\}\{(.*?)\}\{(.*?)\}',
-                            line)
+                        count = self._get_amount_of_lines_in_file(
+                            lesson_file)
+
+                        lesson_match = re.search(self.lesson_regex, line)
 
                         try:
                             lesson_number = lesson_match.group(1)
@@ -62,8 +50,9 @@ class Lessons(Configuration):
                             lesson_numbers.append(lesson_number)
                             lesson_dates.append(lesson_date)
                             lesson_names.append(lesson_name)
-                            lesson_units.append(lesson_unit.replace(
-                                'U', 'u',).replace(' ', '-'))
+                            lesson_units.append(
+                                lesson_unit.lower().replace(' ', '-'))
+
                             if count <= 5:
                                 lesson_unit += " File Empty"
 
@@ -86,19 +75,20 @@ class Lessons(Configuration):
             lesson_names, lesson_units
 
 
-lesson = Lessons()
+def Main():
+    lesson = Lessons()
 
-key, index, selected = lesson.rofi('Select lesson', lesson.options, [
-    '-scroll-method', 1,
-    '-lines', 5,
-    '-markup-rows',
-    '-kb-row-down', 'Down',
-    '-kb-custom-1', 'Ctrl+n',
-    '-keep-left'
-])
+    key, index, selected = lesson.rofi('Select lesson', lesson.options, [
+        '-scroll-method', 1,
+        '-lines', 5,
+        '-markup-rows',
+        '-kb-row-down', 'Down',
+        '-kb-custom-1', 'Ctrl+n',
+        '-keep-left'
+    ])
 
-os.system('xfce4-terminal -e "{} {}"'.format(lesson.editor,
-          '{}/{}/lesson-{}.tex'.format(
-            lesson.current_course,
-            lesson.lesson_units[index],
-            lesson.lesson_numbers[index])))
+    lesson._open_file(lesson.lesson_units[index], lesson.lesson_numbers[index])
+
+
+if __name__ == "__main__":
+    Main()

@@ -7,15 +7,15 @@ This class is used to create a rofi menu for the user to select a command
 to execute.
 """
 
-import os
 import re
-import sys
 from rofi import Rofi
-from datetime import date
-from datetime import datetime
+import os
+import sys
+
+from config import Configuration
 
 
-class NewLesson:
+class NewLesson(Configuration):
     def __init__(self):
         """ This function initializes the class """
 
@@ -47,17 +47,6 @@ class NewLesson:
             self.unit_number, self.lesson_number = self.get_info()
 
         self.write_info()
-
-    def get_current_date(self):
-        """ This function gets the current date """
-
-        today = date.today()
-        now = datetime.now()
-
-        current_date = today.strftime('%b %d %Y %a')
-        current_time = now.strftime('(%H:%M:%S)')
-
-        return current_date, current_time
 
     def get_info(self):
         """ This function gets the information from the user """
