@@ -1,12 +1,11 @@
 #!/bin/sh
 
 source ~/.config/zsh/exports.zsh
-CURRENT_COURSE=~/Documents/notes/current-course
 name=$(cat ${CURRENT_COURSE}/info.yaml | shyaml get-value title)
 
 case $BLOCK_BUTTON in
-	1) $HOME/Singularis/local/scripts/school/rofi-current-course.py ;;
-	3) $HOME/Singularis/local/scripts/school/rofi-lessons.py ;;
+	1) $HOME/Singularis/local/school/main.py --change-course ;;
+	3) $HOME/Singularis/local/school/main.py --lessons ;;
 	6) "$TERMINAL" -e "$EDITOR $0" ;;
 esac
 
