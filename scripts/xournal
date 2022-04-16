@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# key="$1"
+# file="$(pwd)/$1"
+
+# xournal "$file"
+xournal /home/hashem/Documents/school-notes/notes/2022-04-14/note.xoj
