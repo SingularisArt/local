@@ -25,4 +25,3 @@ esac
 
 change_icon
 echo ${icon}
-
