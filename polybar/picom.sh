@@ -1,20 +1,38 @@
-#!/usr/bin/bash
+#!/usr/bin/sh
 
-change_icon() {
-  if (($(ps -aux | grep [p]icom | wc -l) > 0)); then
-    icon=""
-  else
-    icon=""
-  fi
-}
+# while true; do
+  # echo  
+  # echo 
+  # echo 
+  # echo 
+  # echo 
+  # echo 
+  # echo 
+  # echo 
+  # echo 
+  # echo 
+  # echo 
+  # echo 
+  # echo 
+  # echo 
+  # echo 
+  # echo 
+  # echo 
+  # echo 
+  # echo 
+  # echo 
 
-if [[ $(ps -aux | grep picom | wc -l) > 1 ]]; then
+  # sleep 30 &
+  # wait
+# done
+
+if (($(ps -aux | grep [p]icom | wc -l) > 0))
+then
+  # polybar-msg hook blur-toggle 1
   pkill -9 picom
   notify-send -u low 'picom' "Blur Disabled"
 else
-  picom -b --config ~/.config/picom/picom.conf --experimental-backends --backend glx --blur-method dual_kawase &
+  # polybar-msg hook blur-toggle 2
+  picom &
   notify-send -u low 'picom' "Blur Enabled"
 fi
-
-change_icon
-echo ${icon}
