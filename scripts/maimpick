@@ -1,85 +1,10 @@
 #!/bin/sh
 
-check_package() {
-  if [[ -d /usr/bin/$1 ]]; then
-    rofi -e "<i><b><span color='blue'>\"$1\"</span><span color='red'> must be installed</span></b></i>" -markup
-    exit
-  fi
-}
-
-check_package "maim"
-check_package "sxiv"
-
-options="A Selected Area\nThe Current Window\nThe Full Screen"
-yesNo="Yes\nNo"
-image_types="JPG\nPNG\nJPEG"
-command="maim -o --delay=3"
-
-option=$(echo -e ${options} | rofi -dmenu -window-title "Select")
-
-image_path=$(rofi -dmenu -window-title """Enter where you want to save this image
-Don't add a trailing /""")
-
-image_path="${HOME}/${image_path:2}/"
-
-if [[ ! -d ${image_path} ]]; then
-  confirmation=$(echo -e ${yesNo} | rofi -dmenu -window-title """${image_path} doesn't exist
-Do you want me to create it""")
-
-  case ${confirmation} in
-    "Yes")
-      mkdir -p ${image_path}
-      ;;
-    "No")
-      exit
-      ;;
-  esac
-fi
-
-image_name=$(rofi -dmenu -window-title """Enter image name
-Don't include the file extension, just the name of the image""")
-
-image_type=$(echo -e ${image_types} | rofi -dmenu -window-title "Select")
-image_type=$(echo ${image_type} | tr '[:upper:]' '[:lower:]')
-
-cursor=$(echo -e ${yesNo} | rofi -dmenu -window-title "Do you want the cursor showing")
-
-case ${cursor} in
-  "Yes")
-    command=${command}
-    ;;
-  "No")
-    command="maim -o -u --delay=3"
-    ;;
+case "$(printf "a selected area\\ncurrent window\\nfull screen\\na selected area (copy)\\ncurrent window (copy)\\nfull screen (copy)" | rofi -i -dmenu)" in
+	"a selected area") maim -s pic-selected-"$(date '+%y%m%d-%H%M-%S').png" ;;
+	"current window") maim -i "$(xdotool getactivewindow)" pic-window-"$(date '+%y%m%d-%H%M-%S').png" ;;
+	"full screen") maim pic-full-"$(date '+%y%m%d-%H%M-%S').png" ;;
+	"a selected area (copy)") maim -s | xclip -selection clipboard -t image/png ;;
+	"current window (copy)") maim -i "$(xdotool getactivewindow)" | xclip -selection clipboard -t image/png ;;
+	"full screen (copy)") maim | xclip -selection clipboard -t image/png ;;
 esac
-
-image_location="${image_path}${image_name}.${image_type}"
-
-view="sxiv ${image_location}"
-
-ask_to_save() {
-  save_confirmation=$(echo -e ${yesNo} | rofi -dmenu -window-title "Save Image")
-
-  if [[ ${save_confirmation} -eq "No" ]]; then
-    rm -rf ${image_location}
-  fi
-}
-
-case ${option} in
-  "A Selected Area")
-    ${command} "${image_location}"
-    ${view}
-    ask_to_save
-    ;;
-  "The Current Window")
-    "${command} -i $(xdotool getactivewindow)" "${image_location}"
-    ${view}
-    ask_to_save
-    ;;
-  "The Full Screen")
-    ${command} "${image_location}"
-    ${view}
-    ask_to_save
-    ;;
-esac
-

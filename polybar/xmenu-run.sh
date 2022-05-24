@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-cat <<EOF | xmenu -i -p 0x25:1 | bash &
+
+cat <<EOF | xmenu | sh &
  Applications
 	 Firefox										firefox
 	 Terminal									xfce4-terminal
