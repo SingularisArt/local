@@ -1,137 +1,290 @@
 #!/usr/bin/env bash
 
-#cat <<EOF | xmenu -i -p 1783x21 | bash &
+TERMINAL="xfce4-terminal"
+CONFIGDIR="$HOME/.config"
+SCHOOLNOTESDIR="$HOME/Documents/notes/school-notes"
+JOURNALEDIR="$HOME/Documents/notes/journal"
+BOOKNOTES="$HOME/Documents/notes/book-notes"
+NVIMCONFIGDIR="$CONFIGDIR/nvim/lua/SingularisArt"
+today_journal_dir="$JOURNALEDIR/$(date +%F)"
+  
 cat <<EOF | xmenu -i | bash &
  Applications
-	 Firefox										firefox
-	 Terminal									xfce4-terminal
-	 Files											nautilus
+	 Firefox												firefox
+	 Chrome												google-chrome-stable
+	 Terminal											$TERMINAL
+	 Files													thunar
+	
+	 Book Notes
+		 Mathematics
+			The Complete Idiots Guide to Trigonometry
+				 PDF											zathura $BOOKNOTES/mathematics/the-complete-idiots-guide-to-trigonometry/master.pdf
+				 Source Code 						$TERMINAL -e "nvim $BOOKNOTES/mathematics/the-complete-idiots-guide-to-trigonometry/master.tex"
+	 Journal
+		 Journal 										zathura $JOURNALEDIR/master.pdf
+		 Today's Notes								$TERMINAL -e "nvim $today_journal_dir/note.tex"
+		 Open Xournal 								cd "${today_journal_dir}" || exit; if [ -f "note.xoj" ]; then xournal note.xoj; else touch "note.xoj"; xournal note.xoj; fi
+		 Launch lf    								$TERMINAL -e "lf $today_journal_dir"
 	 School
-		 Notes										zathura ~/Documents/notes/current-course/master.pdf
+		 Zotero											zotero
+		
+		 Notes
+			 Current Course Notes 			zathura $SCHOOLNOTESDIR/current-course/master.pdf
+			﮶ Current Course Lectures 	$TERMINAL -e "nvim $SCHOOLNOTESDIR/current-course/lectures"
+			
+			MTH 112 
+				Notes Source Code					$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/master.tex"
+				Final Notes (TEX)  				zathura $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/master.pdf
+				
+				Lecture Notes
+					Lecture 1								$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-1.tex"
+					Lecture 2								$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-2.tex"
+					Lecture 3								$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-3.tex"
+					Lecture 4								$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-4.tex"
+					Lecture 5								$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-5.tex"
+					Lecture 6								$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-6.tex"
+					Lecture 7								$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-7.tex"
+					Lecture 8								$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-8.tex"
+					Lecture 9								$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-9.tex"
+					Lecture 10							$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-10.tex"
+					Lecture 11							$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-11.tex"
+					Lecture 12							$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-12.tex"
+					Lecture 13							$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-13.tex"
+					Lecture 14							$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-14.tex"
+					Lecture 15							$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-15.tex"
+					Lecture 16							$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-16.tex"
+					Lecture 17							$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-17.tex"
+					Lecture 18							$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-18.tex"
+					Lecture 19							$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-19.tex"
+					Lecture 20							$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/lectures/lec-20.tex"
+				
+				Assignments
+					Latex Files
+						Assignment 1						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-1.tex"
+						Assignment 2						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-2.tex"
+						Assignment 3						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-3.tex"
+						Assignment 4						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-4.tex"
+						Assignment 5						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-5.tex"
+						Assignment 6						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-6.tex"
+						Assignment 7						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-7.tex"
+						Assignment 8						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-8.tex"
+						Assignment 9						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-9.tex"
+						Assignment 10						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-10.tex"
+					Yaml Files
+						Assignment 1						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-1.yaml"
+						Assignment 2						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-2.yaml"
+						Assignment 3						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-3.yaml"
+						Assignment 4						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-4.yaml"
+						Assignment 5						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-5.yaml"
+						Assignment 6						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-6.yaml"
+						Assignment 7						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-7.yaml"
+						Assignment 8						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-8.yaml"
+						Assignment 9						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-9.yaml"
+						Assignment 10						$TERMINAL -e "nvim $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/latex-files/week-10.yaml"
+					PDF Files
+						Assignment 1						zathura $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/pdf-files/week-1.pdf
+						Assignment 2						zathura $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/pdf-files/week-2.pdf
+						Assignment 3						zathura $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/pdf-files/week-3.pdf
+						Assignment 4						zathura $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/pdf-files/week-4.pdf
+						Assignment 5						zathura $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/pdf-files/week-5.pdf
+						Assignment 6						zathura $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/pdf-files/week-6.pdf
+						Assignment 7						zathura $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/pdf-files/week-7.pdf
+						Assignment 8						zathura $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/pdf-files/week-8.pdf
+						Assignment 9						zathura $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/pdf-files/week-9.pdf
+						Assignment 10						zathura $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/assignments/pdf-files/week-10.pdf
+				
+				Books
+					Algebra and Trig				zathura $SCHOOLNOTESDIR/College/Year-1/semester-2/hs-pre-calculus-2/books/algebra_trigonometry.pdf
+	 Comms
+		Discord (GUI)									discord
+		Discord (TUI)									$TERMINAL -e "cordless"
+		 Email (TUI)           			$TERMINAL -e "neomutt"
+		 IRC           							$TERMINAL -e "weechat"
+		 SMS              						kdeconnect-sms --style gtk2
+		 Slack												slack
+		 Signal (GUI)								signal-desktop
+		 Telegram (GUI)							telegram-desktop
+		 Telegram (TUI)							nctelegram
+	 Finance
+		 Crypto (TUI)								$TERMINAL -e "cointop"
+		 Stocks (TUI)								$TERMINAL -e "mop"
 	 Utilities
-		 Calculator (TUI)				xfce4-terminal -e "qalc"
-		 Calculator (GUI)				qalculate-gtk
-		 Calendar								xfce4-terminal -e "calcurse"
-		 Color Picker						gpick
-		 Map (TUI)								xfce4-terminal -e "mapscii"
-		Ranger										xfce4-terminal -e "ranger"
-		Zathura										zathura
+		 Calculator (TUI)						$TERMINAL -e "qalq"
+		 Calculator (GUI)						qalculate-gtk
+		 Calendar (TUI)							$TERMINAL -e "khal interactive"
+		 Calendar (GUI)							gnome-calendar
+		 Color Picker								gpick
+		 Map      										$TERMINAL -e "mapscii"
+		 Writing Books 							manuskript
+		
+		 System
+			 Kill Window								xkill
+			 Keyboard             			ckb-next
+			 Fonts                   	gucharmap
+			 Smartphone             		kdeconnect-app --style gtk2
+			 Screen Recording      		obs
+			 Screenshot
+				All Displays							flameshot screen -d 5000 -n 3 -p $HOME/Photos/screenshots
+				Middle Display						flameshot screen -d 5000 -n 0 -p $HOME/Photos/screenshots
+				Right Display							flameshot screen -d 5000 -n 1 -p $HOME/Photos/screenshots
+				Left Display							flameshot screen -d 5000 -n 2 -p $HOME/Photos/screenshots
+		 Personal
+			 Nextcloud									nextcloud --style gtk2
+			 Passwords             		keepassxc --style gtk2
+			 Keys             					seahorse
 		 Theming
-			lxappearance						lxappearance
-			GTK         						oomox-gui
-			Qt        							qt5ct --style gtk2
-			WPGTK										wpg
+			lxappearance								lxappearance
+			GTK        									oomox-gui
+			Qt        									qt5ct --style gtk2
+			WPGTK												wpg
 		 Monitors
-			Ytop										xfce4-terminal -e ytop
-			Bashtop									xfce4-terminal -e bashtop
-			Glances									xfce4-terminal -e glances
-			Disk Usage	(AUI)				baobab
-			Disk Usage	(TUI)				xfce4-terminal -e ncdu
-			IO											xfce4-terminal -e iotop
-			Kernel									xfce4-terminal -e kmon
-			Nvidia GPU							xfce4-terminal -e nvtop
-			Power										xfce4-terminal -e powertop
-			DNS											xfce4-terminal -e powertop
-			Network Usage         	xfce4-terminal -e jnettop
-			Network Load        		xfce4-terminal -e nload
-			Bandwidth		      			xfce4-terminal -e bmon
-	 System
-		 Fonts										gucharmap
-		 Kill Window							xkill
-		 Screen Recording				simplescreenrecorder
-		 Screenshot
-			All											scrot $HOME/Photos/screenshots/screenshot.png
-			Current Window					scrot -ubz $HOME/Photos/screenshots/screenshot.png
-			Select Window						scrot -sbz $HOME/Photos/screenshots/screenshot.png
-		 Entertainment
-			 Media
-				 RSS									xfce4-terminal -e "newsboat"
-				 Reddit							xfce4-terminal -e "tuir"
-				 Music								xfce4-terminal -e "ncmpcpp"
-				Soulseek							xfce4-terminal -e "nicotine"
-			 Games
-				 Steam								steam
-				Itch									itch
-				Lutris								lutris
-				Tetris								tetris
-				Solitaire							ttysolitaire
-				Battleship						bs
-				Minecraft							minecraft-launcher
-				Dopewars							dopewars
-		 Misc
-			Cava										xfce4-terminal -e "cava"
-			Pipes   								xfce4-terminal -e "pipes -p 4"
-			Rain   									xfce4-terminal -e "rain"
-			Cmatrix									xfce4-terminal -e "cmatrix"
-			Asciiquarium						xfce4-terminal -e "asciiquarium"
-			Bonsai   								xfce4-terminal -e "bonsai -l -i -T"
+			System (ytop)								$TERMINAL -e "ytop"
+			System (bashtop)						$TERMINAL -e "bashtop"
+			System (glances)						$TERMINAL -e "glances"
+			
+			Disk Usage (GUI)						baobab
+			Disk Usage (TUI)						$TERMINAL -e "ncdu"
+			IO (iotop)									$TERMINAL -e "iotop"
+			
+			Kernel (kmon)								$TERMINAL -e "kmon"
+			Nvidia GPU (nvtop)					$TERMINAL -e "nvtop"
+			Power (powertop)						$TERMINAL -e "powertop"
+			
+			Network Usage (jnettop)			$TERMINAL -e "jnettop"
+			Network Load (nload)				$TERMINAL -e "nload"
+			Bandwidth (bmon)						$TERMINAL -e "bmon"
+		 Media
+			 EasyTag										easytag
+	 Entertainment
+		 Media
+			 Podcasts (castero)				$TERMINAL -e "castero"
+			 RSS (newsboat)						$TERMINAL -e "newsboat"
+			 Reddit (tuir)							$TERMINAL -e "tuir"
+			 Music (cmus)							$TERMINAL -e "cmus"
+			 Spotify (GUI)							spotify
+			 Spotify (spotifytui)			spt
+			Soulseek (Nicotine+)				nicotine
+		 Games
+			 Steam											steam
+			Itch												itch
+			Lutris											$TERMINAL -e "lutris"
+			Tetris											$TERMINAL -e "tetris"
+			Solitaire										$TERMINAL -e "ttysolitaire"
+			 Battleship								$TERMINAL -e "bs"
+			 Minecraft									minecraft-launcher
+			Dopewars										$TERMINAL -e "dopewars"
 	 Science
+		Anki													anki
+		
 		 Astronomy
-			Celestia								celestia
+			Celestia										celestia
 		 Biology
-			Pymol										pymol
+			Pymol												pymol
 		 Chemistry
-			Ptable									xfce4-terminal -e "python3.6 ~/Singularis/vendor/pTable/ptable.py"
-			Chemtool								chemtool
+			chemtool										chemtool
 		 Math
-			Desmos									desmos
-			Geogebra								geogebra
-		Anki											anki
+			Geogebra										geogebra
 	 Development
 		 IDEs
-			Neovim									xfce4-terminal -e "nvim"
-		bitwise										bitwise
+			Neovim											$TERMINAL -e "nvim"
+	 LibreOffice
+		LibreOffice										libreoffice
+		Writer												libreoffice --writer
+		Calc													libreoffice --calc
+		Draw													libreoffice --draw
+		Web 													libreoffice --web
+		Base 													libreoffice --base
+		Presentation 									libreoffice --impress
+		Math         									libreoffice --math
 
  Configs
 	 System
-		 Sound										pavucontrol
-		 .Xprofile								xfce4-terminal -e "nvim $HOME/.xprofile"
-		 Start Menu							xfce4-terminal -e "nvim $HOME/Singularis/local/scripts/xmenu-script"
-		 Notifications						xfce4-terminal -e "nvim $HOME/.config/dunst/dunstrc"
-		Window Managers
-			 DWM										xfce4-terminal -e "nvim $HOME/.config/dwm/dwm-config/config.h"
-			 i3										xfce4-terminal -e "nvim $HOME/.config/i3/config"
-			 Awesome								xfce4-terminal -e "nvim $HOME/.config/awesome/rc.lua"
+		 Bspwm												$TERMINAL -e "nvim $CONFIGDIR/bspwm/bspwmrc"
+		 Start Menu									$TERMINAL -e "nvim $HOME/Singularis/local/xmenu-script"
+		 Notifications								$TERMINAL -e "nvim $CONFIGDIR/dunst/dunstrc"
+		 Smartphone									kdeconnect-settings --style gtk2
+		 Sound												pavucontrol
+		 .Xresources									$TERMINAL -e "nvim $HOME/.Xresources"
+		
 		 Shell
-			Zsh
-				Main									xfce4-terminal -e "nvim $HOME/.config/zsh/.zshrc"
-				Functions							xfce4-terminal -e "nvim $HOME/.config/zsh/functions.zsh"
-				Aliases								xfce4-terminal -e "nvim $HOME/.config/zsh/aliases.zsh"
-				Color									xfce4-terminal -e "nvim $HOME/.config/zsh/color.zsh"
-				Prompt								xfce4-terminal -e "nvim $HOME/.config/zsh/prompt.zsh"
-				Exports								xfce4-terminal -e "nvim $HOME/.config/zsh/exports.zsh"
-				Options								xfce4-terminal -e "nvim $HOME/.config/zsh/options.zsh"
-				Vim-Mode							xfce4-terminal -e "nvim $HOME/.config/zsh/vim-mode.zsh"
-		 Rofi
-			config									xfce4-terminal -e "nvim $HOME/.config/rofi/config.rasi"
+			bash												$TERMINAL -e "nvim $HOME/.bashrc"
+			zsh													$TERMINAL -e "nvim $HOME/.zshrc"
+		 polybar
+			config											$TERMINAL -e "nvim $CONFIGDIR/polybar/config.init"
+			modules											$TERMINAL -e "nvim $CONFIGDIR/polybar/modules.init"
+			launch script								$TERMINAL -e "nvim $CONFIGDIR/polybar/scripts/launch.sh"
+		 rofi
+			config											$TERMINAL -e "nvim $CONFIGDIR/rofi/config.rasi"
+		 Utilities
+			 khard											$TERMINAL -e "nvim $CONFIGDIR/khard/khard.conf"
+			 khal											$TERMINAL -e "nvim $CONFIGDIR/khal/config"
+			 vdirsyncer								$TERMINAL -e "nvim $CONFIGDIR/vdirsyncer/config"
+	
 	 User
-		Ranger										xfce4-terminal -e "nvim $HOME/.config/ranger/rc.conf"
-		Newsboat									xfce4-terminal -e "nvim $HOME/.config/newsboat/config"
-		Ncmpcpp										xfce4-terminal -e "nvim $HOME/.config/ncmpcpp/config"
-		Zathura										xfce4-terminal -e "nvim $HOME/.config/zathura/zathurarc"
-		Awesome										xfce4-terminal -e "nvim $HOME/.config/awesome/rc.lua"
-		Neofetch									xfce4-terminal -e "nvim $HOME/.config/neofetch/config.conf"
-		Htop											xfce4-terminal -e "nvim $HOME/.config/htop/htoprc"
-		Dwm
-			Dwm											xfce4-terminal -e "nvim $HOME/.config/dwm/dwm-config/config.h"
-			Dmenu										xfce4-terminal -e "nvim $HOME/.config/dwm/dmenu/config.h"
-			Statusbar								xfce4-terminal -e "nvim $HOME/.config/dwm/dwm-statusbar/dwm-iconbar"
-		NeoMutt
-			NeoMuttrc								xfce4-terminal -e "nvim $HOME/.muttrc"
-			Colors									xfce4-terminal -e "nvim $HOME/.config/mutt/colors.mutt"
-			Settings								xfce4-terminal -e "nvim $HOME/.config/mutt/settings.mutt"
-			Mappings								xfce4-terminal -e "nvim $HOME/.config/mutt/bindings.mutt"
-			Mailcap									xfce4-terminal -e "nvim $HOME/.config/mutt/mailcap"
-		NeoVim
-			Main										xfce4-terminal -e "nvim $HOME/.config/nvim/init.vim"
-			Settings								xfce4-terminal -e "nvim $HOME/.config/nvim/lua/core/settings.lua"
-			Lsp 										xfce4-terminal -e "nvim $HOME/.config/nvim/lua/core/lsp.lua"
-			Mappings								xfce4-terminal -e "nvim $HOME/.config/nvim/lua/core/keymappings.lua"
-			Plugin-Settings					xfce4-terminal -e "nvim $HOME/.config/nvim/lua/plugin-configs/"
-			Plugins									xfce4-terminal -e "nvim $HOME/.config/nvim/lua/core/plugins.lua"
-			UltiSnips								xfce4-terminal -e "nvim $HOME/.config/nvim/UltiSnips"
+		lf    												$TERMINAL -e "nvim $CONFIGDIR/lf/lfrc"
+		newsboat											$TERMINAL -e "nvim $CONFIGDIR/newsboat/config"
+		neofetch											$TERMINAL -e "nvim $CONFIGDIR/neofetch/config.conf"
+		htop													$TERMINAL -e "nvim $CONFIGDIR/htop/htoprc"
+		s-tui													$TERMINAL -e "nvim $CONFIGDIR/s-tui/s-tui.conf"
+		spicetify											$TERMINAL -e "nvim $CONFIGDIR/spicetify/config.ini"
+		stonks												$TERMINAL -e "nvim $CONFIGDIR/stonks.yml"
+		
+		neomutt
+			neomuttrc										$TERMINAL -e "nvim $CONFIGDIR/neomutt/neomuttrc"
+			colors											$TERMINAL -e "nvim $CONFIGDIR/neomutt/colors.muttrc"
+			settings										$TERMINAL -e "nvim $CONFIGDIR/neomutt/settings.muttrc"
+			mailcap											$TERMINAL -e "nvim $CONFIGDIR/neomutt/mailcap"
+			
+			mappings
+				Bindings									$TERMINAL -e "nvim $CONFIGDIR/neomutt/keys/bind.muttrc"
+				Unbindings								$TERMINAL -e "nvim $CONFIGDIR/neomutt/keys/unbind.muttrc"
+		neovim
+			main												$TERMINAL -e "nvim $CONFIGDIR/nvim/init.lua"
+			options											$TERMINAL -e "nvim $NVIMCONFIGDIR/options.lua"
+			keymaps											$TERMINAL -e "nvim $NVIMCONFIGDIR/keymaps.lua"
+			plugins											$TERMINAL -e "nvim $NVIMCONFIGDIR/plugins.lua"
+			
+			configuration
+				alpha										  $TERMINAL -e "nvim $NVIMCONFIGDIR/alpha.lua"
+				autocommands						  $TERMINAL -e "nvim $NVIMCONFIGDIR/autocommands.lua"
+				autopairs								  $TERMINAL -e "nvim $NVIMCONFIGDIR/autopairs.lua"
+				bufferline							  $TERMINAL -e "nvim $NVIMCONFIGDIR/bufferline.lua"
+				colorscheme							  $TERMINAL -e "nvim $NVIMCONFIGDIR/colorscheme.lua"
+				comment									  $TERMINAL -e "nvim $NVIMCONFIGDIR/comment.lua"
+				gitsigns								  $TERMINAL -e "nvim $NVIMCONFIGDIR/gitsigns.lua"
+				impatient								  $TERMINAL -e "nvim $NVIMCONFIGDIR/impatient.lua"
+				indentline							  $TERMINAL -e "nvim $NVIMCONFIGDIR/indentline.lua"
+				lualine									  $TERMINAL -e "nvim $NVIMCONFIGDIR/lualine.lua"
+				markdown								  $TERMINAL -e "nvim $NVIMCONFIGDIR/markdown.lua"
+				neogen									  $TERMINAL -e "nvim $NVIMCONFIGDIR/neogen.lua"
+				nvim-tree								  $TERMINAL -e "nvim $NVIMCONFIGDIR/nvim-tree.lua"
+				project									  $TERMINAL -e "nvim $NVIMCONFIGDIR/project.lua"
+				telescope								  $TERMINAL -e "nvim $NVIMCONFIGDIR/telescope.lua"
+				toggleterm							  $TERMINAL -e "nvim $NVIMCONFIGDIR/toggleterm.lua"
+				treesitter							  $TERMINAL -e "nvim $NVIMCONFIGDIR/treesitter.lua"
+				ultisnips								  $TERMINAL -e "nvim $NVIMCONFIGDIR/ultisnips.lua"
+				vimtex									  $TERMINAL -e "nvim $NVIMCONFIGDIR/vimtex.lua"
+				which key									$TERMINAL -e "nvim $NVIMCONFIGDIR/which-key.lua"
+				
+				cmp
+					main 										$TERMINAL -e "nvim $NVIMCONFIGDIR/cmp/init.lua"
+					emails									$TERMINAL -e "nvim $NVIMCONFIGDIR/cmp/cmp_emails.lua"
+					github issues						$TERMINAL -e "nvim $NVIMCONFIGDIR/cmp/cmp_github_issues.lua"
+					cmp											$TERMINAL -e "nvim $NVIMCONFIGDIR/cmp/cmp.lua"
+				dap
+					main 										$TERMINAL -e "nvim $NVIMCONFIGDIR/dap/init.lua"
+					dap 										$TERMINAL -e "nvim $NVIMCONFIGDIR/dap/nvim-dap.lua"
+					dap installer 					$TERMINAL -e "nvim $NVIMCONFIGDIR/dap/nvim-dap-installer.lua"
+					dap ui 									$TERMINAL -e "nvim $NVIMCONFIGDIR/dap/nvim-dap-ui.lua"
+					dap virtual text 				$TERMINAL -e "nvim $NVIMCONFIGDIR/dap/nvim-dap-virtual-text.lua"
+				lsp
+					main 										$TERMINAL -e "nvim $NVIMCONFIGDIR/lsp/init.lua"
+					handlers 								$TERMINAL -e "nvim $NVIMCONFIGDIR/lsp/handlers.lua"
+					null ls 								$TERMINAL -e "nvim $NVIMCONFIGDIR/lsp/null.lua"
+					servers 								$TERMINAL -e "nvim $NVIMCONFIGDIR/lsp/servers.lua"
 
  System
-	 Shutdown									poweroff
-	 Reboot										reboot
+	 Logout			logout
+	 Shutdown		poweroff
+	 Reboot			reboot
 EOF
